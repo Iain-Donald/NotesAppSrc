@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.IainNotes" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="android:colorBackgroundFloating">@color/appSurface</item>
+        <item name="colorOnSurface">@color/appTextPrimary</item>
+        <item name="android:textColorPrimary">@color/appTextPrimary</item>
+        <item name="android:textColorHint">@color/appTextHint</item>
+        <item name="android:colorBackground">@color/appBackground</item>
+
+        <!-- Custom attributes resolved from colors.xml / values-night/colors.xml -->
+        <item name="appBackground">@color/appBackground</item>
+        <item name="appSurface">@color/appSurface</item>
+        <item name="appTextPrimary">@color/appTextPrimary</item>
+        <item name="appTextSecondary">@color/appTextSecondary</item>
+        <item name="appTextHint">@color/appTextHint</item>
+        <item name="appDivider">@color/appDivider</item>
+        <item name="appInputBackground">@color/appInputBackground</item>
+    </style>
+
+</resources>

@@ -1,0 +1,36 @@
+[versions]
+agp = "8.12.0-alpha03"
+kotlin = "2.3.20"
+# using kotlinxSerialization to switch from SQLite (via room) using native sqlite + room generation, to JSON with native serialization.
+# Benefits: less plugins and dependencies, less components to maintain in step with kotlin version, less overall maintenance to keep app functional with modern Android updates. Less complexity within backend assuming a comparison to post-room generated queries.
+# Drawbacks: full file loads into RAM + full file re-written for any access or modifications. This is not a significant issue on such a small dataset though. If the scope expands, it can easily be converted to another structure or split into multiple files. For example: by month.
+kotlinxSerialization = "1.10.0"
+coreKtx = "1.18.0"
+junit = "4.13.2"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+appcompat = "1.7.1"
+material = "1.13.0"
+constraintlayout = "2.2.1"
+lifecycle = "2.10.0"
+activityKtx = "1.13.0"
+commonsCompress = "1.26.1" # tar archive support.
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" } # Activity
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" } # tar archive support.
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" } # JSON

@@ -1,0 +1,9 @@
+Multiple Gradle daemons might be spawned because the Gradle JDK and JAVA_HOME locations are different.
+Project 'IainNotes' is using the following JDK location when running Gradle:
+'C:\Program Files\Android\Android Studio1\jbr'
+The system environment variable JAVA_HOME is:
+'C:\Program Files\Microsoft\jdk-21.0.3.9-hotspot'
+If you dont need to use different paths (or if JAVA_HOME is undefined), you can avoid spawning multiple daemons by setting JAVA_HOME and the JDK location to the same path.
+More info...
+Select the Gradle JDK location
+Do not show this warning again

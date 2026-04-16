@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="appBackground">#F5F5F0</color>
+    <color name="appSurface">#EAEAE5</color>
+    <color name="appTextPrimary">#111111</color>
+    <color name="appTextSecondary">#555550</color>
+    <color name="appTextHint">#999990</color>
+    <color name="appDivider">#DDDDDD</color>
+    <color name="appInputBackground">#E0E0DA</color>
+
+    <color name="accent">#FFB300</color>
+    <color name="accent_dark">#CC8F00</color>
+    <color name="icon_accent">#FFB300</color>
+    <color name="badge_active">#FF5252</color>
+    <color name="badge_inactive">#888888</color>
+
+    <!--Iain's colors-->
+    <color name="mainButton">#cccccc</color>
+    <color name="black">#000000</color>
+    <color name="white">#ffffff</color>
+    <color name="materialDefaultGrey">#e3e3e3</color>
+
+    <!--Strawberry-->
+    <color name="exp1">#cf6a73</color>
+    <color name="exp4">#a63140</color>
+    <color name="exp5">#ec727b</color>
+    <color name="exp6">#ff828a</color>
+    <color name="exp7">#a63140</color>
+    <color name="exp8">#cf6a73</color>
+
+    <color name="dandelion1">#FFB300</color>
+    <color name="dandelion2">#CC8F00</color>
+    <color name="dandelion3">#CD9F0B</color>
+
+    <color name="sylf"> #7092ff</color>
+    <color name="sylf2dim"> #5f7cd9</color>
+
+    <color name="treeParadise">#add19e</color>
+
+    <!--Teal-->
+    <color name="exp2">#7ac2d7</color>
+    <color name="exp3">#4a8a9e</color>
+</resources>
