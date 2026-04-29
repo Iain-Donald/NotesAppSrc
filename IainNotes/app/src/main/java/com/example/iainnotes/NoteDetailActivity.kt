@@ -1,10 +1,17 @@
 package com.example.iainnotes
-
+// TODO: test
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
+import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -14,6 +21,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iainnotes.databinding.ActivityNoteDetailBinding
 import kotlinx.coroutines.launch
+//import androidx.core.graphics.toColorInt
 
 class NoteDetailActivity : AppCompatActivity() {
 
@@ -21,6 +29,7 @@ class NoteDetailActivity : AppCompatActivity() {
     private lateinit var alarmAdapter: AlarmAdapter
     private var noteId = ""
     private var savedContent: CharArray = charArrayOf()
+    private var noteLoaded = false
     private val diff get() = binding.etNoteContent.text.toString() != String(savedContent)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +38,14 @@ class NoteDetailActivity : AppCompatActivity() {
 
         binding = ActivityNoteDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Alarm panel starts hidden
+        var alarmPanelVisible = false
+
+        binding.btnToggleAlarms.setOnClickListener {
+            alarmPanelVisible = !alarmPanelVisible
+            animate_Alarm(alarmPanelVisible)
+        }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -42,6 +59,12 @@ class NoteDetailActivity : AppCompatActivity() {
         })
 
         noteId = intent.getStringExtra("noteId") ?: return
+
+        // Temporary test
+        binding.btnNotify.setOnClickListener {
+            android.util.Log.d("NOTIFY", "btnNotify tapped in onCreate")
+            Toast.makeText(this, "notify tapped", Toast.LENGTH_SHORT).show()
+        }
 
         alarmAdapter = AlarmAdapter(
             onToggle = { alarm, checked ->
@@ -109,6 +132,7 @@ class NoteDetailActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        noteLoaded = false
         savedContent.fill('\u0000')
         savedContent = charArrayOf()
         binding.etNoteContent.text?.clear()
@@ -121,26 +145,50 @@ class NoteDetailActivity : AppCompatActivity() {
 
     private fun loadNote() {
         lifecycleScope.launch {
-            try {
-                val data = DataStore.load(this@NoteDetailActivity)
-                val note = data.notes.find { it.id == noteId } ?: return@launch
-                val alarms = data.alarms.filter { it.noteId == noteId }
+            val data = DataStore.load(this@NoteDetailActivity)
+            val note = data.notes.find { it.id == noteId } ?: return@launch
+            val alarms = data.alarms.filter { it.noteId == noteId }
 
-                binding.header.text = "<${note.title}>"
+            binding.header.text = "<${note.title}>"
 
-                // Update savedContent and field together on load
-                val contentChars = note.content.toCharArray()
-                if (!binding.etNoteContent.text.toString().toCharArray()
-                        .contentEquals(contentChars)
-                ) {
-                    binding.etNoteContent.setText(note.content)
+            if (!noteLoaded) {
+                // First load — populate the editor and set the baseline for diff tracking.
+                binding.etNoteContent.setText(note.content)
+                savedContent = note.content.toCharArray()
+                noteLoaded = true
+            }
+            // On subsequent resumes (e.g. returning from app switcher or AddAlarmActivity),
+            // leave the editor content and savedContent alone so unsaved edits are preserved.
+
+            alarmAdapter.submitList(alarms)
+            updateSaveButton()
+
+            // Update icon based on current state
+            binding.btnNotify.setImageResource(
+                if (note.notifyEnabled) R.drawable.baseline_notifications_24
+                else R.drawable.outline_notifications_off_24
+            )
+
+            // Re-set listener with fresh note reference each load
+            binding.btnNotify.setOnClickListener {
+                lifecycleScope.launch {
+                    try {
+                        val updated = note.copy(notifyEnabled = !note.notifyEnabled)
+                        android.util.Log.d("NOTIFY", "note.notifyEnabled before: ${note.notifyEnabled}")
+                        android.util.Log.d("NOTIFY", "updated.notifyEnabled: ${updated.notifyEnabled}")
+                        DataStore.updateNote(this@NoteDetailActivity, updated)
+                        val check = DataStore.load(this@NoteDetailActivity)
+                        android.util.Log.d("NOTIFY", "after load notifyEnabled: ${check.notes.find { it.id == noteId }?.notifyEnabled}")
+                        if (updated.notifyEnabled) {
+                            NoteNotificationManager.notify(this@NoteDetailActivity, updated)
+                        } else {
+                            NoteNotificationManager.cancel(this@NoteDetailActivity, note.id)
+                        }
+                        loadNote()
+                    } catch (e: Exception) {
+                        handleDataStoreError(e)
+                    }
                 }
-                savedContent = contentChars
-
-                alarmAdapter.submitList(alarms)
-                updateSaveButton()
-            }  catch (e: Exception) {
-                handleDataStoreError(e)
             }
         }
     }
@@ -164,12 +212,13 @@ class NoteDetailActivity : AppCompatActivity() {
     private fun updateSaveButton() {
         val hasChanges = diff
         binding.btnSaveNote.isEnabled = hasChanges
-        binding.btnSaveNote.backgroundTintList = ColorStateList.valueOf(
-            if (hasChanges)
-                getColor(com.google.android.material.R.color.design_default_color_primary)
-            else
-                android.graphics.Color.parseColor("#AAAAAA")
-        )
+        if (hasChanges) {
+            binding.btnSaveNote.backgroundTintList = ColorStateList.valueOf(
+                getColor(com.google.android.material.R.color.design_default_color_primary))
+            binding.btnSaveNote.visibility = View.VISIBLE
+        } else {
+            binding.btnSaveNote.visibility = View.GONE
+        }
     }
 
     private fun showUnsavedChangesDialog() {
@@ -193,5 +242,58 @@ class NoteDetailActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+
+    private fun animate_Alarm(alarmVisible: Boolean) {
+        if (alarmVisible) {
+            // Slide down — animate from 0 height to wrap_content
+            binding.layoutAlarmSection.visibility = View.VISIBLE
+            binding.layoutAlarmSection.measure(
+                View.MeasureSpec.makeMeasureSpec(binding.root.width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            )
+            val targetHeight = binding.layoutAlarmSection.measuredHeight
+            binding.layoutAlarmSection.layoutParams.height = 0
+            binding.layoutAlarmSection.requestLayout()
+
+            ValueAnimator.ofInt(0, targetHeight).apply {
+                duration = 300
+                interpolator = DecelerateInterpolator()
+                addUpdateListener { animator ->
+                    binding.layoutAlarmSection.layoutParams.height =
+                        animator.animatedValue as Int
+                    binding.layoutAlarmSection.requestLayout()
+                }
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        // Let it wrap content naturally after animation
+                        binding.layoutAlarmSection.layoutParams.height =
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        binding.layoutAlarmSection.requestLayout()
+                    }
+                })
+                start()
+            }
+        } else {
+            // Slide up — animate from current height to 0
+            val initialHeight = binding.layoutAlarmSection.measuredHeight
+            ValueAnimator.ofInt(initialHeight, 0).apply {
+                duration = 300
+                interpolator = AccelerateInterpolator()
+                addUpdateListener { animator ->
+                    binding.layoutAlarmSection.layoutParams.height =
+                        animator.animatedValue as Int
+                    binding.layoutAlarmSection.requestLayout()
+                }
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        binding.layoutAlarmSection.visibility = View.GONE
+                        binding.layoutAlarmSection.layoutParams.height =
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                    }
+                })
+                start()
+            }
+        }
     }
 }

@@ -32,6 +32,10 @@
     <color name="dandelion2">#CC8F00</color>
     <color name="dandelion3">#CD9F0B</color>
 
+    <!--App Grey-->
+    <color name="appGrey1">#999990</color>
+    <color name="appGrey1Lighter">#aaaaaa</color>
+
     <color name="treeParadise">#add19e</color>
 
     <color name="sylf"> #7092ff</color>

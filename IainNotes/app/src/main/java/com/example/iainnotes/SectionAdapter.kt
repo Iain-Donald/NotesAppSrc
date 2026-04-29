@@ -11,9 +11,19 @@ import com.example.iainnotes.databinding.ItemSectionBinding
 class SectionAdapter(
     private val onClick: (Section) -> Unit,
     private val onRename: (Section) -> Unit,
-    private val onDelete: (Section) -> Unit
+    private val onDelete: (Section) -> Unit,
+    private val onMove: (fromPos: Int, toPos: Int) -> Unit
 ) : ListAdapter<Section, SectionAdapter.ViewHolder>(DiffCallback()) {
 
+    fun currentIds(): List<String> = (0 until itemCount).map { getItem(it).id }
+
+    fun moveItem(from: Int, to: Int) {
+        val list = currentList.toMutableList()
+        val item = list.removeAt(from)
+        list.add(to, item)
+        submitList(list)
+        onMove(from, to)
+    }
     inner class ViewHolder(val binding: ItemSectionBinding) :
         RecyclerView.ViewHolder(binding.root)
 

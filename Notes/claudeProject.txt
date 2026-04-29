@@ -1,0 +1,11 @@
+// Details: 
+Repair and improve the codebase of, and add features to my Android notes app. The app uses Kotlin, XML views, viewbinding, and is for Android API level 36 and up. 
+
+// Instructions: 
+Goals of the code base are: 
+- Consolidate any excess left behind from old features or experiments.
+- Avoid use of Android specific APIs, formats, or OS features where practical. Prioritize packages of open source code not likely to need changes for a very long time, or standard library Java or Kotlin. 
+- Avoid leaking concurrency such as threads that are never closed. 
+- Kotlin and Java code should be kept easy to ready with little use of abbreviations for names of classes, functions, and variables. Code structure that is easy to read is prioritized over trendy styles. Newer paradigms are fine but the code style itself should be kept classic. 
+
+As far as I'm aware, it's necessary for alarms to be kept in an unencrypted location to be used with Android when the app closes or the phone restarts. Sections are represented as folders and notes as text documents in those folders. A JSON file for notes and sections reference the names of these folders, where the first segment is an ID encoded from the time as apparent in the codebase, and the second part is the name presented in the app, which should be changed to only name folders and text files with the first name, and the second name kept as a name element in the JSON to avoid filesystem-specific errors for certain characters. Alarms are kept in a separate JSON file. 

@@ -19,9 +19,15 @@ class BootReceiver : BroadcastReceiver() {
         )
         if (!alarmsFile.exists()) return
 
+        val text = try { alarmsFile.readText() } catch (_: Exception) { return }
+
         val alarms: List<AlarmEntry> = try {
-            json.decodeFromString(alarmsFile.readText())
-        } catch (e: Exception) {
+            if (text.trimStart().startsWith("[")) {
+                json.decodeFromString<List<AlarmEntry>>(text)
+            } else {
+                json.decodeFromString<AlarmsFile>(text).alarms
+            }
+        } catch (_: Exception) {
             return
         }
 

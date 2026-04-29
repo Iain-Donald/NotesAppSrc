@@ -10,6 +10,10 @@
         android:maxSdkVersion="36" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
@@ -20,12 +24,29 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.IainNotes">
+
         <receiver android:name=".AlarmReceiver" android:exported="true" />
         <receiver android:name=".BootReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".NoteNotifyReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.example.iainnotes.ACTION_CANCEL_NOTE_NOTIFY" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".LockNotificationService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Lock screen presence indicator" />
+        </service>
 
         <provider
             android:name="androidx.core.content.FileProvider"

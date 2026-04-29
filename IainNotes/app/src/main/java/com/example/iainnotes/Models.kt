@@ -9,6 +9,7 @@ fun currentTimestamp(): String {
         now.year, now.monthValue, now.dayOfMonth,
         now.hour, now.minute, now.second
     )
+
 }
 
 //json
@@ -17,9 +18,12 @@ data class Section(
     val id: String = generateId("s"),
     val name: String,
     val createdAt: String = IdGenerator.decodeId(
-        id.substringAfter("s").substringBefore("-")
+        id.substringAfter("s")
     ) ?: currentTimestamp(),
-    val modifiedAt: String = createdAt
+    val modifiedAt: String = createdAt,
+    val sortOrder: String = "date_created",  // "date_created", "alpha", "custom"
+    val sortAsc: Boolean = true,
+    val pinned: Boolean = false
 )
 
 @Serializable
@@ -29,9 +33,11 @@ data class Note(
     val title: String,
     val content: String = "",
     val createdAt: String = IdGenerator.decodeId(
-        id.substringAfter("n").substringBefore("-")
+        id.substringAfter("n")
     ) ?: currentTimestamp(),
-    val modifiedAt: String = createdAt
+    val modifiedAt: String = createdAt,
+    val notifyEnabled: Boolean = false,
+    val pinned: Boolean = false
 )
 
 @Serializable
@@ -55,7 +61,10 @@ data class Alarm(
 data class AppData(
     val sections: List<Section> = emptyList(),
     val notes: List<Note> = emptyList(),
-    val alarms: List<Alarm> = emptyList()
+    val alarms: List<Alarm> = emptyList(),
+    val sectionSortOrder: String = "date_created",
+    val sectionSortAsc: Boolean = true,
+    val sectionCustomOrder: List<String> = emptyList()
 )
 
 // Map stored in map.json
@@ -66,7 +75,10 @@ data class SectionEntry(
     val folderName: String,
     val noteIds: List<String> = emptyList(),
     val createdAt: String = "",
-    val modifiedAt: String = ""
+    val modifiedAt: String = "",
+    val sortOrder: String = "date_created",
+    val sortAsc: Boolean = true,
+    val pinned: Boolean = false
 )
 
 @Serializable
@@ -77,7 +89,9 @@ data class NoteEntry(
     val fileName: String,
     val alarmIds: List<String> = emptyList(),
     val createdAt: String = "",
-    val modifiedAt: String = ""
+    val modifiedAt: String = "",
+    val notifyEnabled: Boolean = false,
+    val pinned: Boolean = false
 )
 
 @Serializable
@@ -99,7 +113,9 @@ data class AlarmEntry(
 data class MapFile(
     val version: Int = 1,
     val sections: List<SectionEntry> = emptyList(),
-    val notes: List<NoteEntry> = emptyList()
+    val notes: List<NoteEntry> = emptyList(),
+    val sectionSortOrder: String = "date_created",
+    val sectionSortAsc: Boolean = true
 )
 
 @Serializable
@@ -107,6 +123,7 @@ data class AlarmsFile(
     val version: Int = 1,
     val alarms: List<AlarmEntry> = emptyList()
 )
+
 fun generateId(prefix: String) = "$prefix${IdGenerator.makeId()}"
 
 fun sanitizeName(name: String): String =

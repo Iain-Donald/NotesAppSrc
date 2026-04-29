@@ -45,7 +45,7 @@
         android:visibility="gone"
         android:layout_marginEnd="8dp"
         android:background="@drawable/badge_background"
-        app:layout_constraintEnd_toStartOf="@id/btnDeleteNote"
+        app:layout_constraintEnd_toStartOf="@id/btnPin"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -58,6 +58,34 @@
         android:contentDescription="Delete note"
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btnPin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/outline_push_pin_24"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Pin note"
+        android:padding="8dp"
+        app:tint="@color/icon_accent"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintEnd_toStartOf="@id/btnNotify"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btnNotify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/outline_notifications_off_24"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Toggle notification"
+        android:padding="8dp"
+        app:tint="@color/icon_accent"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintEnd_toStartOf="@id/btnDeleteNote"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 

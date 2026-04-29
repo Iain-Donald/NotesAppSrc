@@ -1,3 +1,10 @@
-<resources>
-    <string name="app_name">IainNotes</string>
-</resources>
+<resource>
+    <string name="app_name">Ttex Sans</string>
+	<!--
+    TeleteX
+    Teletype Serif
+    ttype
+    ttex
+    -->
+	<string name="aboutLabelText">About\nVersion 0.1.0_main</string>
+</resource>

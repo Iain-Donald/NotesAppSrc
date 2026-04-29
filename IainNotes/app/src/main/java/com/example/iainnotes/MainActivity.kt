@@ -2,6 +2,7 @@ package com.example.iainnotes
 
 import android.app.AlarmManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,15 +10,16 @@ import android.os.CountDownTimer
 import android.os.Environment
 import android.provider.Settings
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.iainnotes.databinding.ActivityMainBinding
-//import com.example.iainnotes.Extensions
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.iainnotes.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -25,8 +27,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: SectionAdapter
     private var appData = AppData()
-    //private val db by lazy { AppDatabase.getInstance(this) }
-    //private var mediaPlayer: MediaPlayer? = null
+    private var currentSortOrder = "date_created"
+    private var currentSortAsc = true
+    private var spinnerReady = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeManager.apply()
@@ -40,6 +43,14 @@ class MainActivity : AppCompatActivity() {
                 Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
                     data = Uri.parse("package:$packageName")
                 }
+            )
+        }
+
+        if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                1002
             )
         }
 
@@ -100,8 +111,55 @@ class MainActivity : AppCompatActivity() {
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
-            }
+            },
+            onMove = { _, _ -> }
         )
+
+        val sortOptions = listOf("Date created", "Alphabetical")
+        binding.spinnerSortSections.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            sortOptions
+        )
+
+        binding.spinnerSortSections.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>, view: View?, pos: Int, id: Long
+                ) {
+                    if (!spinnerReady) return
+                    currentSortOrder = when (pos) {
+                        1 -> "alpha"
+                        2 -> "custom"
+                        else -> "date_created"
+                    }
+                    lifecycleScope.launch {
+                        try {
+                            appData = DataStore.updateAppSectionSort(
+                                this@MainActivity, currentSortOrder, currentSortAsc
+                            )
+                            adapter.submitList(sortedSections())
+                        } catch (e: Exception) { handleDataStoreError(e) }
+                    }
+                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
+        binding.btnSortDirSections.setOnClickListener {
+            currentSortAsc = !currentSortAsc
+            binding.btnSortDirSections.setImageResource(
+                if (currentSortAsc) R.drawable.outline_arrow_upward_24
+                else R.drawable.outline_arrow_downward_24
+            )
+            lifecycleScope.launch {
+                try {
+                    appData = DataStore.updateAppSectionSort(
+                        this@MainActivity, currentSortOrder, currentSortAsc
+                    )
+                    adapter.submitList(sortedSections())
+                } catch (e: Exception) { handleDataStoreError(e) }
+            }
+        }
 
         binding.btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -119,13 +177,41 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        NoteNotificationManager.createChannel(this)
+
+        if (intent.getBooleanExtra("lock_and_close", false)) {
+            finish()
+            return
+        }
+
         val prefs = PreferencesManager.load()
         binding.btnLock.visibility =
             if (prefs.usePassphrase) View.VISIBLE else View.GONE
+
+        if (prefs.usePassphrase && DataStore.isUnlocked()) {
+            LockNotificationService.start(this)
+        }
+
         lifecycleScope.launch {
             try {
                 appData = DataStore.load(this@MainActivity)
-                adapter.submitList(appData.sections.toList())
+                NoteNotificationManager.syncAll(this@MainActivity, appData.notes)
+
+                // Sort UI sync now inside coroutine where appData is fresh
+                currentSortOrder = appData.sectionSortOrder
+                currentSortAsc = appData.sectionSortAsc
+                spinnerReady = false
+                binding.spinnerSortSections.setSelection(when (currentSortOrder) {
+                    "alpha" -> 1
+                    "custom" -> 2
+                    else -> 0
+                }, false)
+                binding.btnSortDirSections.setImageResource(
+                    if (currentSortAsc) R.drawable.outline_arrow_upward_24
+                    else R.drawable.outline_arrow_downward_24
+                )
+                spinnerReady = true
+                adapter.submitList(sortedSections())
             } catch (e: Exception) {
                 handleDataStoreError(e)
             }
@@ -135,12 +221,23 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         val prefs = PreferencesManager.load()
-        if (prefs.lockOnClose) DataStore.lock()
+        if (prefs.lockOnClose) {
+            DataStore.lock()
+            LockNotificationService.stop(this)
+        }
+    }
+
+    private fun sortedSections(): List<Section> {
+        return SortHelper.sortedSections(
+            appData.sections,
+            appData.sectionSortOrder,
+            appData.sectionSortAsc
+        )
     }
 
     private fun showLockDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_lock, null)
-        val dialog = AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this@MainActivity)
             .setView(dialogView)
             .setCancelable(false)
             .create()
@@ -156,6 +253,7 @@ class MainActivity : AppCompatActivity() {
             }
             override fun onFinish() {
                 DataStore.lock()
+                LockNotificationService.stop(this@MainActivity)
                 dialog.dismiss()
                 finishAffinity()
             }
@@ -165,6 +263,7 @@ class MainActivity : AppCompatActivity() {
         btnLeave.setOnClickListener {
             timer.cancel()
             DataStore.lock()
+            LockNotificationService.stop(this@MainActivity)
             dialog.dismiss()
             finishAffinity()
         }
@@ -193,16 +292,4 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    /**
-     * A native method that is implemented by the 'iainnotes' native library,
-     * which is packaged with this application.
-     */
-    //external fun stringFromJNI(): String
-
-    /*companion object {
-        // Used to load the 'iainnotes' library on application startup.
-        init {
-            System.loadLibrary("iainnotes")
-        }
-    }*/
 }

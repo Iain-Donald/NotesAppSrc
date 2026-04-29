@@ -20,8 +20,14 @@ class AlarmReceiver : BroadcastReceiver() {
         )
         if (!alarmsFile.exists()) return
 
+        val text = try { alarmsFile.readText() } catch (_: Exception) { return }
+
         val alarms: List<AlarmEntry> = try {
-            json.decodeFromString(alarmsFile.readText())
+            if (text.trimStart().startsWith("[")) {
+                json.decodeFromString<List<AlarmEntry>>(text)
+            } else {
+                json.decodeFromString<AlarmsFile>(text).alarms
+            }
         } catch (e: Exception) {
             return
         }

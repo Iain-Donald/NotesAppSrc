@@ -53,14 +53,17 @@ class AddNoteActivity : AppCompatActivity() {
             Toast.makeText(this, "Title is required", Toast.LENGTH_SHORT).show()
             return
         }
+        val existing = existingNote
         val note = Note(
-            id = existingNote?.id ?: generateId("n"),
-            sectionId = sectionId,
+            id = existing?.id ?: generateId("n"),
+            sectionId = existing?.sectionId ?: sectionId,
             title = title,
-            content = binding.etNoteContent.text.toString()
+            content = binding.etNoteContent.text.toString(),
+            notifyEnabled = existing?.notifyEnabled ?: false,
+            pinned = existing?.pinned ?: false
         )
         lifecycleScope.launch {
-            if (existingNote != null) {
+            if (existing != null) {
                 DataStore.updateNote(this@AddNoteActivity, note)
             } else {
                 DataStore.addNote(this@AddNoteActivity, note)

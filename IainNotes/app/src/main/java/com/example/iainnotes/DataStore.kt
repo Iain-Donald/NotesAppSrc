@@ -9,7 +9,6 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
-//json
 object DataStore {
     private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
     private var passphrase: CharArray = charArrayOf()
@@ -185,6 +184,30 @@ object DataStore {
     class DataStoreException(message: String, cause: Throwable? = null) :
         Exception(message, cause)
 
+    suspend fun toggleNotePin(context: Context, noteId: String): AppData {
+        val map = loadMap()
+        saveMap(map.copy(
+            notes = map.notes.map {
+                if (it.id == noteId) it.copy(pinned = !it.pinned) else it
+            }
+        ))
+        commit()
+        return load(context)
+    }
+
+    suspend fun toggleSectionPin(context: Context, sectionId: String): AppData {
+        val map = loadMap()
+        saveMap(map.copy(
+            sections = map.sections.map {
+                if (it.id == sectionId) it.copy(pinned = !it.pinned) else it
+            }
+        ))
+        commit()
+        return load(context)
+    }
+
+
+
     suspend fun load(context: Context): AppData = withContext(Dispatchers.IO) {
         if (cacheValid && cachedAppData != null) {
             return@withContext cachedAppData!!
@@ -198,7 +221,10 @@ object DataStore {
                     id = it.id,
                     name = it.name,
                     createdAt = it.createdAt,
-                    modifiedAt = it.modifiedAt
+                    modifiedAt = it.modifiedAt,
+                    sortOrder = it.sortOrder,
+                    sortAsc = it.sortAsc,
+                    pinned = it.pinned
                 )
             }
 
@@ -213,7 +239,9 @@ object DataStore {
                     title = noteEntry.title,
                     content = content,
                     createdAt = noteEntry.createdAt,
-                    modifiedAt = noteEntry.modifiedAt
+                    modifiedAt = noteEntry.modifiedAt,
+                    notifyEnabled = noteEntry.notifyEnabled,
+                    pinned = noteEntry.pinned
                 )
             }
 
@@ -233,7 +261,7 @@ object DataStore {
                 )
             }
 
-            AppData(sections = sections, notes = notes, alarms = alarms).also {
+            AppData(sections = sections, notes = notes, alarms = alarms, sectionSortOrder = map.sectionSortOrder, sectionSortAsc = map.sectionSortAsc).also {
                 cachedAppData = it
                 cacheValid = true
             }
@@ -314,7 +342,8 @@ object DataStore {
             title = note.title,
             fileName = fileName,
             createdAt = IdGenerator.decodeId(note.id.substringAfter("n")) ?: now,
-            modifiedAt = now
+            modifiedAt = now,
+            notifyEnabled = note.notifyEnabled
         )
         writeText(path, note.content)
         saveMap(map.copy(notes = map.notes + entry))
@@ -333,20 +362,22 @@ object DataStore {
             files[newPath] = files.remove(oldPath) ?: byteArrayOf()
             newName
         } else noteEntry.fileName
+        val updatedEntry = noteEntry.copy(
+            title = note.title,
+            fileName = newFileName,
+            modifiedAt = currentTimestamp(),
+            notifyEnabled = note.notifyEnabled,
+            pinned = note.pinned
+        )
         writeText(
-            "userData/sections/${sectionEntry.folderName}/$newFileName",
+            "userData/sections/${sectionEntry.folderName}/${updatedEntry.fileName}",
             note.content
         )
         saveMap(map.copy(
             notes = map.notes.map {
-                if (it.id == note.id) it.copy(title = note.title, fileName = newFileName) else it
+                if (it.id == note.id) updatedEntry else it
             }
         ))
-        val updatedEntry = noteEntry.copy( // iain
-            title = note.title,
-            fileName = newFileName,
-            modifiedAt = currentTimestamp()
-        )
         commit()
         return load(context)
     }
@@ -359,6 +390,41 @@ object DataStore {
         saveAlarmsDirect(loadAlarmsDirect().filter { it.noteId != noteId })
         saveMap(map.copy(
             notes = map.notes.filter { it.id != noteId },
+        ))
+        commit()
+        return load(context)
+    }
+
+    // Sort order
+
+    suspend fun updateSectionSort(
+        context: Context,
+        sectionId: String,
+        sortOrder: String,
+        sortAsc: Boolean
+    ): AppData {
+        val map = loadMap()
+        saveMap(map.copy(
+            sections = map.sections.map {
+                if (it.id == sectionId) it.copy(
+                    sortOrder = sortOrder,
+                    sortAsc = sortAsc
+                ) else it
+            }
+        ))
+        commit()
+        return load(context)
+    }
+
+    suspend fun updateAppSectionSort(
+        context: Context,
+        sortOrder: String,
+        sortAsc: Boolean
+    ): AppData {
+        val map = loadMap()
+        saveMap(map.copy(
+            sectionSortOrder = sortOrder,
+            sectionSortAsc = sortAsc
         ))
         commit()
         return load(context)

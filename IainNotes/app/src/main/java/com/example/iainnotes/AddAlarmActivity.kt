@@ -5,29 +5,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.iainnotes.databinding.ActivityAddAlarmBinding
-
-import com.example.iainnotes.IdGenerator.makeId // ID generator function
 import kotlinx.coroutines.launch
-
-//import java.util.UUID
-import java.time.Instant;
-/*
-
-ID format for storage:
-
-yyyymmdd-hhmmss-mmm (milliseconds) -> into hex by all numbers (one large number not including hyphens):
-47FABCCF11EE18 (stored as creation date in JSON as well)
-
-Whole name in storage example:
-47FABCCF11EE18-documentName
-
-If importing a document of the same name -> Ask to either: compare and choose one, make copy, archive and check later.
-- Stored in archive folder as: _arc<iterationIfDuplicate>z_47FABCCF11EE18-documentName eg.  _arc3z_47FABCCF11EE18-documentName
-    - This protects from the user making a name that interferes with the structure because the user cannot start note name with special character, currently the hyphen. Once one hyphen is parsed, all others are treated as part of the document name.
-    - Starting with "_arc" means archive.
-    -"_arc<N>z" z after _arc<number> means read ID. The prefix can't be mistaken for an ID because r is not a hex character and the epoch is not 3 digits long.
-
-*/
 
 class AddAlarmActivity : AppCompatActivity() {
 
@@ -110,7 +88,7 @@ class AddAlarmActivity : AppCompatActivity() {
                 }
 
                 val alarm = Alarm(
-                    id = makeId(),
+                    id = generateId("t"),
                     noteId = noteId,
                     sectionId = note.sectionId,
                     name = name,
