@@ -106,11 +106,19 @@ class MainActivity : AppCompatActivity() {
                     .setPositiveButton("Delete") { _, _ ->
                         lifecycleScope.launch {
                             appData = DataStore.deleteSection(this@MainActivity, section.id)
-                            adapter.submitList(appData.sections.toList())
+                            adapter.submitList(sortedSections())
                         }
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
+            },
+            onPin = { section ->
+                lifecycleScope.launch {
+                    try {
+                        appData = DataStore.toggleSectionPin(this@MainActivity, section.id)
+                        adapter.submitList(sortedSections())
+                    } catch (e: Exception) { handleDataStoreError(e) }
+                }
             },
             onMove = { _, _ -> }
         )

@@ -79,13 +79,18 @@ class NoteAdapter(
         holder.binding.tvNoteTitle.text = note.title
         holder.binding.tvNotePreview.text = note.content.take(80).ifBlank { "No content" }
 
-        holder.binding.btnPin.setImageResource(
-            if (note.pinned) R.drawable.outline_push_pin_24
-            else R.drawable.outline_push_pin_24   // use a filled vs outline variant for on/off
-        )
-        holder.binding.btnPin.setOnClickListener {
-            // handled via a new onPin callback
+        if (note.pinned) {
+            holder.binding.btnPin.setImageResource(R.drawable.baseline_push_pin_24)
+            holder.binding.btnPin.imageTintList = androidx.core.content.ContextCompat.getColorStateList(
+                holder.binding.btnPin.context, R.color.icon_accent
+            )
+        } else {
+            holder.binding.btnPin.setImageResource(R.drawable.outline_push_pin_24)
+            holder.binding.btnPin.imageTintList = androidx.core.content.ContextCompat.getColorStateList(
+                holder.binding.btnPin.context, R.color.appGrey1Lighter
+            )
         }
+        holder.binding.btnPin.setOnClickListener { onPin(note) }
 
         val noteAlarms = alarms.filter { it.noteId == note.id }
         if (noteAlarms.isEmpty()) {

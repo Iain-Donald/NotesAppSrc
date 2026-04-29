@@ -12,6 +12,7 @@ class SectionAdapter(
     private val onClick: (Section) -> Unit,
     private val onRename: (Section) -> Unit,
     private val onDelete: (Section) -> Unit,
+    private val onPin: (Section) -> Unit,
     private val onMove: (fromPos: Int, toPos: Int) -> Unit
 ) : ListAdapter<Section, SectionAdapter.ViewHolder>(DiffCallback()) {
 
@@ -36,12 +37,24 @@ class SectionAdapter(
         val section = getItem(position)
         holder.binding.tvSectionName.text = section.name
         holder.binding.root.setOnClickListener { onClick(section) }
-        holder.binding.btnDeleteSection.setOnClickListener { onDelete(section) }
         holder.binding.root.setOnLongClickListener {
             onRename(section)
             true
         }
         holder.binding.btnDeleteSection.setOnClickListener { onDelete(section) }
+
+        if (section.pinned) {
+            holder.binding.btnPin.setImageResource(R.drawable.baseline_push_pin_24)
+            holder.binding.btnPin.imageTintList = androidx.core.content.ContextCompat.getColorStateList(
+                holder.binding.btnPin.context, R.color.icon_accent
+            )
+        } else {
+            holder.binding.btnPin.setImageResource(R.drawable.outline_push_pin_24)
+            holder.binding.btnPin.imageTintList = androidx.core.content.ContextCompat.getColorStateList(
+                holder.binding.btnPin.context, R.color.appGrey1Lighter
+            )
+        }
+        holder.binding.btnPin.setOnClickListener { onPin(section) }
     }
 
     class DiffCallback : DiffUtil.ItemCallback<Section>() {
