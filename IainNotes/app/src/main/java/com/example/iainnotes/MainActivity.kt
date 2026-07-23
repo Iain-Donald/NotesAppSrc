@@ -1,9 +1,17 @@
 package com.example.iainnotes
 
 import android.app.AlarmManager
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.Gravity
+import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -20,6 +28,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iainnotes.databinding.ActivityMainBinding
+import com.example.iainnotes.databinding.DialogSearchBinding
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -173,6 +182,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
+        binding.btnSearch.setOnClickListener {
+            showSearchDialog()
+        }
+
         binding.btnLock.setOnClickListener {
             showLockDialog()
         }
@@ -292,12 +305,93 @@ class MainActivity : AppCompatActivity() {
                     val name = input.text.toString().trim()
                     if (name.isNotEmpty()) {
                         appData = DataStore.addSection(this@MainActivity, name)
-                        adapter.submitList(appData.sections.toList())
+                        adapter.submitList(sortedSections())
                     }
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    private fun showSearchDialog() {
+        val dialogBinding = DialogSearchBinding.inflate(layoutInflater)
+
+        // Scope row is never shown at top level — always hidden
+        dialogBinding.layoutScopeRow.visibility = View.GONE
+
+        val resultAdapter = SearchResultAdapter { result ->
+            startActivity(
+                Intent(this, NoteDetailActivity::class.java).apply {
+                    putExtra("noteId", result.note.id)
+                }
+            )
+        }
+        dialogBinding.rvSearchResults.layoutManager = LinearLayoutManager(this)
+        dialogBinding.rvSearchResults.adapter = resultAdapter
+
+        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        dialog.setContentView(dialogBinding.root)
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setDimAmount(0.7f)
+            addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            setGravity(Gravity.TOP)
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        }
+
+        // Push the card below the status bar and any display cutout (e.g. punch-hole camera)
+        dialogBinding.cardSearch.post {
+            val insets = dialogBinding.cardSearch.rootWindowInsets
+            val topInset = if (insets != null) {
+                val cutout = insets.displayCutout?.safeInsetTop ?: 0
+                maxOf(insets.systemWindowInsetTop, cutout)
+            } else 0
+            val params = dialogBinding.cardSearch.layoutParams as android.widget.FrameLayout.LayoutParams
+            params.topMargin = topInset + 8
+            dialogBinding.cardSearch.layoutParams = params
+        }
+
+        var optionsVisible = false
+        dialogBinding.btnSearchOptions.setOnClickListener {
+            optionsVisible = !optionsVisible
+            val visibility = if (optionsVisible) View.VISIBLE else View.GONE
+            dialogBinding.dividerOptions.visibility = visibility
+            dialogBinding.layoutContentRow.visibility = visibility
+        }
+
+        fun runSearch() {
+            val query = dialogBinding.etSearchQuery.text.toString()
+            val caseSensitive = dialogBinding.btnCaseSensitive.isSelected
+            val includeContent = dialogBinding.switchIncludeContent.isChecked
+
+            val results = SearchHelper.search(
+                appData = appData,
+                query = query,
+                caseSensitive = caseSensitive,
+                scopeSectionId = null,
+                includeContent = includeContent
+            )
+            resultAdapter.submitList(results)
+            dialogBinding.tvNoResults.visibility =
+                if (results.isEmpty() && query.isNotBlank()) View.VISIBLE else View.GONE
+        }
+
+        dialogBinding.btnCaseSensitive.setOnClickListener {
+            dialogBinding.btnCaseSensitive.isSelected = !dialogBinding.btnCaseSensitive.isSelected
+            //dialogBinding.btnCaseSensitive.alpha = if (dialogBinding.btnCaseSensitive.isSelected) 1f else 0.5f
+            runSearch()
+        }
+        //dialogBinding.btnCaseSensitive.alpha = 0.5f
+
+        dialogBinding.switchIncludeContent.setOnCheckedChangeListener { _, _ -> runSearch() }
+
+        dialogBinding.etSearchQuery.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) { runSearch() }
+        })
+
+        dialog.show()
     }
 
 }

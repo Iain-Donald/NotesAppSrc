@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+    <font
+        android:fontStyle="normal"
+        android:fontWeight="400"
+        android:font="@font/stixre" />
+    <font
+        android:fontStyle="italic"
+        android:fontWeight="400"
+        android:font="@font/stixi" />
+    <font
+        android:fontStyle="normal"
+        android:fontWeight="500"
+        android:font="@font/stixmed" />
+    <font
+        android:fontStyle="italic"
+        android:fontWeight="500"
+        android:font="@font/stixmedi" />
+    <font
+        android:fontStyle="normal"
+        android:fontWeight="700"
+        android:font="@font/stixb" />
+    <font
+        android:fontStyle="italic"
+        android:fontWeight="700"
+        android:font="@font/stixbi" />
+</font-family>

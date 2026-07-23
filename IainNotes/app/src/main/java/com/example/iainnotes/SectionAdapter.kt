@@ -51,7 +51,7 @@ class SectionAdapter(
         } else {
             holder.binding.btnPin.setImageResource(R.drawable.outline_push_pin_24)
             holder.binding.btnPin.imageTintList = androidx.core.content.ContextCompat.getColorStateList(
-                holder.binding.btnPin.context, R.color.appGrey1Lighter
+                holder.binding.btnPin.context, R.color.buttonL3
             )
         }
         holder.binding.btnPin.setOnClickListener { onPin(section) }

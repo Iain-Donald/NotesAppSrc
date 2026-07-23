@@ -1,24 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="appBackground">#0D0D0D</color>
-    <color name="appSurface">#1A1A1A</color>
-    <color name="appTextPrimary">#FFFFFF</color>
-    <color name="appTextSecondary">#8A8070</color>
-    <color name="appTextHint">#555555</color>
-    <color name="appDivider">#2A2A2A</color>
-    <color name="appInputBackground">#222222</color>
+    <color name="appBackground">#000000</color>
+    <color name="appSurface">#000000</color>
+    <color name="appTextPrimary">#FAFAFA</color>
+    <!--color name="appTextSecondary">#8A8070</color-->
+    <color name="appTextSecondary">#ff1111</color>
+    <!--color name="appTextHint">#555555</color-->
+    <color name="appTextHint">#FAFAFA</color>
+    <color name="appDivider">#ff1111</color>
+    <!--color name="appInputBackground">#222222</color-->
+    <color name="appInputBackground">#551188</color>
+
 
     <color name="accent">#FFB300</color>
     <color name="accent_dark">#CC8F00</color>
     <color name="icon_accent">#FFB300</color>
     <color name="badge_active">#FF5252</color>
-    <color name="badge_inactive">#888888</color>
+    <color name="badge_inactive">#ff1111</color>
 
     <!--Iain's colors-->
-    <color name="mainButton">#cccccc</color>
+    <color name="mainButton">#ff1111</color>
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
-    <color name="materialDefaultGrey">#e3e3e3</color>
+    <color name="materialDefaultGrey">#ff1111</color>
+    <color name="testingpurple">#551188</color>
+    <color name="testingblue">#1322cb</color>
+
+    <!--general-->
+    <color name="buttonL0">#eeeeee</color>
+    <color name="buttonL1">#eeeeee</color>
+    <color name="buttonL2">#eeeeee</color>
+    <color name="buttonL3">#aaaaaa</color>
+    <color name="textL2">#dddddd</color>
+    <color name="textL2_5">#cccccc</color>
+    <color name="borderPrimary">#eeeeee</color>
+    <color name="borderSecondary">#ff1111</color>
+    <color name="borderBlend">#333333</color>
 
     <!--Strawberry-->
     <color name="exp1">#cf6a73</color>
@@ -33,8 +50,8 @@
     <color name="dandelion3">#CD9F0B</color>
 
     <!--App Grey-->
-    <color name="appGrey1">#999990</color>
-    <color name="appGrey1Lighter">#aaaaaa</color>
+    <color name="appGrey1">#ff1111</color>
+    <color name="appGrey1Lighter">#ff1111</color>
 
     <color name="treeParadise">#add19e</color>
 

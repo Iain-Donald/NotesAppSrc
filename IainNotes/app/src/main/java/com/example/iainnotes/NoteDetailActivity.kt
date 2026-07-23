@@ -17,6 +17,8 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iainnotes.databinding.ActivityNoteDetailBinding
@@ -149,7 +151,24 @@ class NoteDetailActivity : AppCompatActivity() {
             val note = data.notes.find { it.id == noteId } ?: return@launch
             val alarms = data.alarms.filter { it.noteId == noteId }
 
-            binding.header.text = "<${note.title}>"
+            binding.header.text = run {
+                val sectionName = data.sections.find { it.id == note.sectionId }?.name
+                if (sectionName != null) "Sections > $sectionName > ${note.title}"
+                else "Sections > ${note.title}"
+            }
+
+            binding.header.setTextColor(
+                ContextCompat.getColor(this@NoteDetailActivity, R.color.buttonL1)
+            )
+            //binding.header.setTextColor(android.graphics.Color.parseColor("#22ffff"))
+
+            /*binding.header.text = run {
+                val sectionName = data.sections.find { it.id == note.sectionId }?.name
+                if (sectionName != null) "Sections > $sectionName > ${note.title}"
+                else "Sections > ${note.title}"
+            }*/
+
+            //binding.header.colo
 
             if (!noteLoaded) {
                 // First load — populate the editor and set the baseline for diff tracking.

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:gravity="top">
+
+	<androidx.cardview.widget.CardView
+		android:id="@+id/cardSearch"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_margin="12dp"
+		app:cardCornerRadius="12dp"
+		app:cardElevation="8dp"
+		app:cardBackgroundColor="@color/appSurface">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:padding="12dp">
+
+			<!-- Search bar row: field + Aa toggle + 3-dot menu -->
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				android:gravity="center_vertical">
+
+				<EditText
+					android:id="@+id/etSearchQuery"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:hint="Search..."
+					android:inputType="text"
+					android:imeOptions="actionSearch"
+					android:singleLine="true"
+					android:background="@null"
+					android:textSize="16sp"
+					android:fontFamily="@font/inter"
+					android:textColor="@color/textL2_5"
+					android:textColorHint="?attr/appTextHint" />
+
+				<androidx.appcompat.widget.AppCompatButton
+					android:id="@+id/btnCaseSensitive"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Aa"
+					android:textSize="12sp"
+					android:fontFamily="@font/intermed"
+					android:minWidth="0dp"
+					android:paddingStart="10dp"
+					android:paddingEnd="10dp"
+					android:backgroundTint="@null"
+					android:textColor="@color/selector_a"
+					android:background="@drawable/button_outline"
+					android:layout_marginStart="6dp"
+					android:textAllCaps="false"/>
+
+				<ImageButton
+					android:id="@+id/btnSearchOptions"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:src="@drawable/outline_more_vert_24"
+					android:background="?attr/selectableItemBackgroundBorderless"
+					android:contentDescription="Search options"
+					android:padding="8dp"
+					android:tint="@color/textL2_5"
+					android:layout_marginStart="2dp" />
+
+			</LinearLayout>
+
+			<!-- Options divider — hidden until 3-dot opened -->
+			<View
+				android:id="@+id/dividerOptions"
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:background="?attr/appDivider"
+				android:layout_marginTop="8dp"
+				android:layout_marginBottom="8dp"
+				android:visibility="gone" />
+
+			<!-- Scope row — hidden in MainActivity, managed by 3-dot in SectionActivity -->
+			<LinearLayout
+				android:id="@+id/layoutScopeRow"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				android:gravity="center_vertical"
+				android:layout_marginBottom="4dp"
+				android:visibility="gone">
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Search in"
+					android:textSize="14sp"
+					android:textColor="?attr/appTextPrimary"
+					android:layout_marginEnd="8dp" />
+
+				<Button
+					android:id="@+id/btnScopeSection"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="This section"
+					android:textSize="12sp"
+					android:minWidth="0dp"
+					android:paddingStart="10dp"
+					android:paddingEnd="10dp"
+					style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+				<Button
+					android:id="@+id/btnScopeAll"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="All"
+					android:textSize="12sp"
+					android:minWidth="0dp"
+					android:paddingStart="10dp"
+					android:paddingEnd="10dp"
+					android:layout_marginStart="4dp"
+					style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+			</LinearLayout>
+
+			<!-- Include content row — hidden until 3-dot opened -->
+			<LinearLayout
+				android:id="@+id/layoutContentRow"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal"
+				android:gravity="center_vertical"
+				android:visibility="gone">
+
+				<TextView
+					android:id="@+id/tvContentLabel"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:text="Search contents"
+					android:fontFamily="@font/inter"
+					android:textSize="14sp"
+					android:textColor="@color/textL2_5" />
+
+				<androidx.appcompat.widget.SwitchCompat
+					android:id="@+id/switchIncludeContent"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:checked="false"
+					android:showText="false" />
+
+			</LinearLayout>
+
+			<!-- Results list -->
+			<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/rvSearchResults"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:maxHeight="400dp"
+				android:nestedScrollingEnabled="true"
+				android:layout_marginTop="4dp"/>
+
+			<!-- No results label -->
+			<TextView
+				android:id="@+id/tvNoResults"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="No results"
+				android:textSize="14sp"
+				android:fontFamily="@font/inter"
+				android:textColor="@color/textL2_5"
+				android:textAlignment="center"
+				android:visibility="gone"
+				android:paddingTop="12dp"
+				android:paddingBottom="4dp" />
+
+		</LinearLayout>
+
+	</androidx.cardview.widget.CardView>
+
+</FrameLayout>

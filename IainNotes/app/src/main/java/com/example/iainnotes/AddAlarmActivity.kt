@@ -56,12 +56,16 @@ class AddAlarmActivity : AppCompatActivity() {
     }
 
     private fun saveAlarm() {
-        val name = binding.etName.text.toString().trim()
-        val displayText = binding.etDisplayText.text.toString().trim()
+        var name = binding.etName.text.toString().trim()
+        var displayText = binding.etDisplayText.text.toString().trim()
 
-        if (name.isEmpty() || displayText.isEmpty()) {
-            Toast.makeText(this, "Name and display text are required", Toast.LENGTH_SHORT).show()
-            return
+        if (name.isEmpty()/* || displayText.isEmpty()*/) {
+            name = "Alarm"
+            //Toast.makeText(this, "Missing alarm name", Toast.LENGTH_SHORT).show()
+            //return
+        }
+        if (displayText.isEmpty()) {
+            displayText = " "
         }
         lifecycleScope.launch {
             try {

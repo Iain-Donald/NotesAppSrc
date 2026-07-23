@@ -9,7 +9,7 @@
 
     <TextView
         android:id="@+id/tvTime"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="64sp"
         android:textStyle="bold"
@@ -21,7 +21,7 @@
 
     <TextView
         android:id="@+id/tvAlarmName"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -33,7 +33,7 @@
 
     <TextView
         android:id="@+id/tvDisplayText"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:textColor="#888888"
@@ -45,28 +45,23 @@
 
     <Button
         android:id="@+id/btnSnooze"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Snooze 10 min"
-        android:layout_marginTop="48dp"
-        android:layout_marginEnd="8dp"
         app:backgroundTint="@color/exp5"
-        app:layout_constraintTop_toBottomOf="@id/tvDisplayText"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="@id/btnDismiss"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnDismiss"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tvDisplayText" />
 
     <Button
         android:id="@+id/btnDismiss"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Dismiss"
-        android:layout_marginTop="48dp"
-        android:layout_marginStart="8dp"
         app:backgroundTint="@color/exp5"
-        app:layout_constraintTop_toBottomOf="@id/tvDisplayText"
-        app:layout_constraintStart_toEndOf="@id/btnSnooze"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/btnSnooze"
+        app:layout_constraintStart_toStartOf="@id/btnSnooze"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

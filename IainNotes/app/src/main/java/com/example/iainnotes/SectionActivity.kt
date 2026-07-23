@@ -1,19 +1,25 @@
 package com.example.iainnotes
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
-//import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iainnotes.databinding.ActivitySectionBinding
+import com.example.iainnotes.databinding.DialogSearchBinding
 import kotlinx.coroutines.launch
 
-//jsonwS
 class SectionActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySectionBinding
@@ -21,7 +27,7 @@ class SectionActivity : AppCompatActivity() {
     private var sectionId = ""
     private var sectionName = ""
     private var currentSection: Section? = null
-    private var pendingCustomOrder: List<String>? = null
+    private var cachedAppData: AppData = AppData()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +36,7 @@ class SectionActivity : AppCompatActivity() {
 
         sectionId = intent.getStringExtra("sectionId") ?: ""
         sectionName = intent.getStringExtra("sectionName") ?: ""
-        binding.header.text = "<sections/$sectionName>"
+        binding.header.text = "Sections > $sectionName"
 
         adapter = NoteAdapter(
             onTap = { note ->
@@ -48,6 +54,7 @@ class SectionActivity : AppCompatActivity() {
                         if (enabled) NoteNotificationManager.notify(this@SectionActivity, updated)
                         else NoteNotificationManager.cancel(this@SectionActivity, note.id)
                         val data = DataStore.load(this@SectionActivity)
+                        cachedAppData = data
                         adapter.updateAlarms(data.alarms)
                         adapter.submitNotes(
                             sortedNotes(data, data.notes.filter { it.sectionId == sectionId })
@@ -67,6 +74,7 @@ class SectionActivity : AppCompatActivity() {
                                     .forEach { AlarmScheduler.cancel(this@SectionActivity, it) }
                                 NoteNotificationManager.cancel(this@SectionActivity, note.id)
                                 val updated = DataStore.deleteNote(this@SectionActivity, note.id)
+                                cachedAppData = updated
                                 adapter.updateAlarms(updated.alarms)
                                 adapter.submitNotes(
                                     sortedNotes(updated, updated.notes.filter { it.sectionId == sectionId })
@@ -80,8 +88,8 @@ class SectionActivity : AppCompatActivity() {
             onPin = { note ->
                 lifecycleScope.launch {
                     try {
-                        DataStore.toggleNotePin(this@SectionActivity, note.id)
-                        val data = DataStore.load(this@SectionActivity)
+                        val data = DataStore.toggleNotePin(this@SectionActivity, note.id)
+                        cachedAppData = data
                         adapter.updateAlarms(data.alarms)
                         adapter.submitNotes(
                             SortHelper.sortedNotes(
@@ -122,6 +130,7 @@ class SectionActivity : AppCompatActivity() {
                             val data = DataStore.updateSectionSort(
                                 this@SectionActivity, sectionId, order, section.sortAsc
                             )
+                            cachedAppData = data
                             refreshList(data)
                         } catch (e: Exception) { handleDataStoreError(e) }
                     }
@@ -138,6 +147,7 @@ class SectionActivity : AppCompatActivity() {
                         this@SectionActivity, sectionId,
                         section.sortOrder, newAsc
                     )
+                    cachedAppData = data
                     binding.btnSortDir.setImageResource(
                         if (newAsc) R.drawable.outline_arrow_upward_24
                         else R.drawable.outline_arrow_downward_24
@@ -145,6 +155,14 @@ class SectionActivity : AppCompatActivity() {
                     refreshList(data)
                 } catch (e: Exception) { handleDataStoreError(e) }
             }
+        }
+
+        binding.btnSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
+        binding.btnSearch.setOnClickListener {
+            showSearchDialog()
         }
 
         binding.fabAddAlarm.setOnClickListener {
@@ -159,18 +177,10 @@ class SectionActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Save pending custom order if user dragged then navigated away
-        /*pendingCustomOrder?.let { order ->
-            lifecycleScope.launch {
-                try {
-                    DataStore.updateSectionCustomOrder(this@SectionActivity, sectionId, order)
-                    pendingCustomOrder = null
-                } catch (e: Exception) { handleDataStoreError(e) }
-            }
-        }*/
         lifecycleScope.launch {
             try {
                 val data = DataStore.load(this@SectionActivity)
+                cachedAppData = data
                 refreshList(data)
             } catch (e: Exception) { handleDataStoreError(e) }
         }
@@ -183,12 +193,11 @@ class SectionActivity : AppCompatActivity() {
         adapter.submitNotes(
             sortedNotes(data, data.notes.filter { it.sectionId == sectionId })
         )
-        // Sync spinner to current sort
         binding.spinnerSort.setSelection(when (section.sortOrder) {
             "alpha" -> 1
             "custom" -> 2
             else -> 0
-        }, false)  // false = no listener trigger
+        }, false)
         binding.btnSortDir.setImageResource(
             if (section.sortAsc) R.drawable.outline_arrow_upward_24
             else R.drawable.outline_arrow_downward_24
@@ -197,6 +206,108 @@ class SectionActivity : AppCompatActivity() {
 
     private fun sortedNotes(data: AppData, notes: List<Note>): List<Note> {
         val section = data.sections.find { it.id == sectionId } ?: return notes
-        return SortHelper.sortedNotes(notes, section.sortOrder, section.sortAsc/*, section.customOrder*/)
+        return SortHelper.sortedNotes(notes, section.sortOrder, section.sortAsc)
+    }
+
+    private fun showSearchDialog() {
+        val dialogBinding = DialogSearchBinding.inflate(layoutInflater)
+
+        val resultAdapter = SearchResultAdapter { result ->
+            startActivity(
+                Intent(this, NoteDetailActivity::class.java).apply {
+                    putExtra("noteId", result.note.id)
+                }
+            )
+        }
+        dialogBinding.rvSearchResults.layoutManager = LinearLayoutManager(this)
+        dialogBinding.rvSearchResults.adapter = resultAdapter
+
+        val dialog = android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        dialog.setContentView(dialogBinding.root)
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setDimAmount(0.7f)
+            addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            setGravity(Gravity.TOP)
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        }
+
+        // Push the card below the status bar and any display cutout (e.g. punch-hole camera)
+        dialogBinding.cardSearch.post {
+            val insets = dialogBinding.cardSearch.rootWindowInsets
+            val topInset = if (insets != null) {
+                val cutout = insets.displayCutout?.safeInsetTop ?: 0
+                maxOf(insets.systemWindowInsetTop, cutout)
+            } else 0
+            val params = dialogBinding.cardSearch.layoutParams as android.widget.FrameLayout.LayoutParams
+            params.topMargin = topInset + 8
+            dialogBinding.cardSearch.layoutParams = params
+        }
+
+        // Scope selection state — true means this section only, false means all
+        var scopeThisSectionOnly = true
+
+        fun updateScopeButtons() {
+            dialogBinding.btnScopeSection.isSelected = scopeThisSectionOnly
+            dialogBinding.btnScopeSection.alpha = if (scopeThisSectionOnly) 1f else 0.5f
+            dialogBinding.btnScopeAll.isSelected = !scopeThisSectionOnly
+            dialogBinding.btnScopeAll.alpha = if (!scopeThisSectionOnly) 1f else 0.5f
+        }
+
+        var optionsVisible = false
+        dialogBinding.btnSearchOptions.setOnClickListener {
+            optionsVisible = !optionsVisible
+            val visibility = if (optionsVisible) View.VISIBLE else View.GONE
+            dialogBinding.dividerOptions.visibility = visibility
+            dialogBinding.layoutScopeRow.visibility = visibility
+            dialogBinding.layoutContentRow.visibility = visibility
+        }
+
+        fun runSearch() {
+            val query = dialogBinding.etSearchQuery.text.toString()
+            val caseSensitive = dialogBinding.btnCaseSensitive.isSelected
+            val includeContent = dialogBinding.switchIncludeContent.isChecked
+            val scopeId = if (scopeThisSectionOnly) sectionId else null
+
+            val results = SearchHelper.search(
+                appData = cachedAppData,
+                query = query,
+                caseSensitive = caseSensitive,
+                scopeSectionId = scopeId,
+                includeContent = includeContent
+            )
+            resultAdapter.submitList(results)
+            dialogBinding.tvNoResults.visibility =
+                if (results.isEmpty() && query.isNotBlank()) View.VISIBLE else View.GONE
+        }
+
+        /*dialogBinding.btnCaseSensitive.setOnClickListener {
+            dialogBinding.btnCaseSensitive.isSelected = !dialogBinding.btnCaseSensitive.isSelected
+            //dialogBinding.btnCaseSensitive.alpha = if (dialogBinding.btnCaseSensitive.isSelected) 1f else 0.5f
+            runSearch()
+        }*/
+        //dialogBinding.btnCaseSensitive.alpha = 0.5f
+
+        dialogBinding.btnScopeSection.setOnClickListener {
+            scopeThisSectionOnly = true
+            updateScopeButtons()
+            runSearch()
+        }
+        dialogBinding.btnScopeAll.setOnClickListener {
+            scopeThisSectionOnly = false
+            updateScopeButtons()
+            runSearch()
+        }
+        updateScopeButtons()
+
+        dialogBinding.switchIncludeContent.setOnCheckedChangeListener { _, _ -> runSearch() }
+
+        dialogBinding.etSearchQuery.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) { runSearch() }
+        })
+
+        dialog.show()
     }
 }

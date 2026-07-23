@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="appBackground">#F5F5F0</color>
-    <color name="appSurface">#EAEAE5</color>
+    <color name="appBackground">#EAEAE5</color>
+    <color name="appSurface">#DDDDDD</color>
     <color name="appTextPrimary">#111111</color>
     <color name="appTextSecondary">#555550</color>
     <color name="appTextHint">#999990</color>
@@ -19,6 +19,19 @@
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
     <color name="materialDefaultGrey">#e3e3e3</color>
+    <color name="testingpurple">#551188</color>
+    <color name="testingblue">#1322cb</color>
+
+    <!--general-->
+    <color name="buttonL0">#111111</color>
+    <color name="buttonL1">#111111</color>
+    <color name="buttonL2">#333333</color>
+    <color name="buttonL3">#888888</color>
+    <color name="textL2">#222222</color>
+    <color name="textL2_5">#555555</color>
+    <color name="borderPrimary">#CCCCCC</color>
+    <color name="borderSecondary">#BBBBBB</color>
+    <color name="borderBlend">#777777</color>
 
     <!--Strawberry-->
     <color name="exp1">#cf6a73</color>

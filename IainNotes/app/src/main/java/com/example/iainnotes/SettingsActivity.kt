@@ -55,7 +55,7 @@ class SettingsActivity : AppCompatActivity() {
             if (!listeningToRadio) return@setOnCheckedChangeListener
             val theme = when (checkedId) {
                 R.id.radioLight -> "light"
-                R.id.radioAmoled -> "amoled"
+                //R.id.radioAmoled -> "amoled"
                 else -> "dark"
             }
             ThemeManager.switch(theme)
@@ -64,7 +64,7 @@ class SettingsActivity : AppCompatActivity() {
         // Set the current selection — flag is false so listener ignores this
         binding.radioTheme.check(when (prefs.theme) {
             "light" -> R.id.radioLight
-            "amoled" -> R.id.radioAmoled
+            //"amoled" -> R.id.radioAmoled
             else -> R.id.radioDark
         })
 
