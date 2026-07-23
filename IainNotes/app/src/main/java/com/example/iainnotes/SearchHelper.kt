@@ -38,17 +38,11 @@ object SearchHelper {
 			val snippet: String? = if (includeContent && !titleMatches) {
 				val contentToMatch = if (caseSensitive) note.content else note.content.lowercase()
 				val matchIndex = contentToMatch.indexOf(normalizedQuery)
-				if (matchIndex >= 0) {
-					extractSnippet(note.content, matchIndex, query.length)
-				} else {
-					null
-				}
-			} else if (includeContent && titleMatches) {
+				if (matchIndex >= 0) extractSnippet(note.content, matchIndex, query.length) else null
+			} else if (includeContent) {
 				// Title matched — still show a snippet if there's content
 				if (note.content.isNotBlank()) extractSnippet(note.content, 0, 0) else null
-			} else {
-				null
-			}
+			} else null
 
 			val matched = titleMatches || snippet != null
 			if (!matched) return@mapNotNull null

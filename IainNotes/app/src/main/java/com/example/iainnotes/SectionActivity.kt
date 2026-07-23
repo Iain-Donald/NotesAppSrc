@@ -14,6 +14,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iainnotes.databinding.ActivitySectionBinding
@@ -234,11 +236,12 @@ class SectionActivity : AppCompatActivity() {
 
         // Push the card below the status bar and any display cutout (e.g. punch-hole camera)
         dialogBinding.cardSearch.post {
-            val insets = dialogBinding.cardSearch.rootWindowInsets
+            val insets = ViewCompat.getRootWindowInsets(dialogBinding.cardSearch)
             val topInset = if (insets != null) {
-                val cutout = insets.displayCutout?.safeInsetTop ?: 0
-                maxOf(insets.systemWindowInsetTop, cutout)
-            } else 0
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top
+                val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout()).top
+                maxOf(systemBars, cutout)
+            } else { 0 }
             val params = dialogBinding.cardSearch.layoutParams as android.widget.FrameLayout.LayoutParams
             params.topMargin = topInset + 8
             dialogBinding.cardSearch.layoutParams = params
