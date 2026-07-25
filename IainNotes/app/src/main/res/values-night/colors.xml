@@ -33,6 +33,8 @@
     <color name="buttonL3">#aaaaaa</color>
     <color name="textL2">#dddddd</color>
     <color name="textL2_5">#cccccc</color>
+    <color name="buttontxtl3">#aaaaaa</color>
+    <color name="notetext">#dddddd</color>
     <color name="borderPrimary">#eeeeee</color>
     <color name="borderSecondary">#ff1111</color>
     <color name="borderBlend">#333333</color>

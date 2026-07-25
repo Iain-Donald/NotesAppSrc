@@ -369,15 +369,8 @@ object DataStore {
             notifyEnabled = note.notifyEnabled,
             pinned = note.pinned
         )
-        writeText(
-            "userData/sections/${sectionEntry.folderName}/${updatedEntry.fileName}",
-            note.content
-        )
-        saveMap(map.copy(
-            notes = map.notes.map {
-                if (it.id == note.id) updatedEntry else it
-            }
-        ))
+        writeText("userData/sections/${sectionEntry.folderName}/${updatedEntry.fileName}", note.content)
+        saveMap(map.copy(notes = map.notes.map { if (it.id == note.id) updatedEntry else it }))
         commit()
         return load(context)
     }

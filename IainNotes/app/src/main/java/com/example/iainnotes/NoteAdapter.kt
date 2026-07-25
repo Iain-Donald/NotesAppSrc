@@ -8,8 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.iainnotes.databinding.ItemNoteBinding
-import androidx.core.graphics.toColorInt
-import androidx.recyclerview.widget.ItemTouchHelper
 import com.example.iainnotes.databinding.ItemNotePinHeaderBinding
 
 class NoteAdapter(

@@ -2,7 +2,6 @@ package com.example.iainnotes
 
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -21,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iainnotes.databinding.ActivitySectionBinding
 import com.example.iainnotes.databinding.DialogSearchBinding
 import kotlinx.coroutines.launch
+import androidx.core.graphics.drawable.toDrawable
 
 class SectionActivity : AppCompatActivity() {
 
@@ -227,7 +227,7 @@ class SectionActivity : AppCompatActivity() {
         val dialog = android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
         dialog.setContentView(dialogBinding.root)
         dialog.window?.apply {
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
             setDimAmount(0.7f)
             addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             setGravity(Gravity.TOP)

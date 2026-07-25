@@ -1,7 +1,6 @@
 package com.example.iainnotes
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.iainnotes.databinding.ActivityAddNoteBinding
@@ -48,10 +47,11 @@ class AddNoteActivity : AppCompatActivity() {
     }
 
     private fun saveNote() {
-        val title = binding.etNoteTitle.text.toString().trim()
+        var title = binding.etNoteTitle.text.toString().trim()
         if (title.isEmpty()) {
-            Toast.makeText(this, "Title is required", Toast.LENGTH_SHORT).show()
-            return
+            //Toast.makeText(this, "Title is required", Toast.LENGTH_SHORT).show()
+            title = "Title"
+            //return
         }
         val existing = existingNote
         val note = Note(

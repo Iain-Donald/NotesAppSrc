@@ -5,8 +5,6 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
@@ -23,6 +21,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
@@ -32,6 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iainnotes.databinding.ActivityMainBinding
 import com.example.iainnotes.databinding.DialogSearchBinding
 import kotlinx.coroutines.launch
+import androidx.core.graphics.drawable.toDrawable
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         if (!Environment.isExternalStorageManager()) {
             startActivity(
                 Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                    data = Uri.parse("package:$packageName")
+                    data = "package:$packageName".toUri()
                 }
             )
         }
@@ -304,11 +304,11 @@ class MainActivity : AppCompatActivity() {
             .setView(input)
             .setPositiveButton("Add") { _, _ ->
                 lifecycleScope.launch {
-                    val name = input.text.toString().trim()
-                    if (name.isNotEmpty()) {
-                        appData = DataStore.addSection(this@MainActivity, name)
-                        adapter.submitList(sortedSections())
-                    }
+                    var name = input.text.toString().trim()
+                    if (name.isEmpty()) name = "Section"
+                    appData = DataStore.addSection(this@MainActivity, name)
+                    adapter.submitList(sortedSections())
+                    Toast.makeText(this@MainActivity, "Section \"$name\" added", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -334,7 +334,7 @@ class MainActivity : AppCompatActivity() {
         val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
         dialog.setContentView(dialogBinding.root)
         dialog.window?.apply {
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
             setDimAmount(0.7f)
             addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             setGravity(Gravity.TOP)

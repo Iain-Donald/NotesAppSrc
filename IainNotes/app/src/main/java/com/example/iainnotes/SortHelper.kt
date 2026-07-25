@@ -7,10 +7,8 @@ object SortHelper {
 		sortOrder: String,
 		sortAsc: Boolean
 	): List<Section> {
-		val pinned = sections.filter { it.pinned }
-			.let { applySectionSort(it, sortOrder, sortAsc) }
-		val unpinned = sections.filter { !it.pinned }
-			.let { applySectionSort(it, sortOrder, sortAsc) }
+		val pinned = applySectionSort(sections.filter { it.pinned }, sortOrder, sortAsc)
+		val unpinned = applySectionSort(sections.filter { !it.pinned }, sortOrder, sortAsc)
 		return pinned + unpinned
 	}
 
@@ -31,10 +29,8 @@ object SortHelper {
 		sortOrder: String,
 		sortAsc: Boolean
 	): List<Note> {
-		val pinned = notes.filter { it.pinned }
-			.let { applyNoteSort(it, sortOrder, sortAsc) }
-		val unpinned = notes.filter { !it.pinned }
-			.let { applyNoteSort(it, sortOrder, sortAsc) }
+		val pinned = applyNoteSort(notes.filter { it.pinned }, sortOrder, sortAsc)
+		val unpinned = applyNoteSort(notes.filter { !it.pinned }, sortOrder, sortAsc)
 		return pinned + unpinned
 	}
 

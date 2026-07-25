@@ -6,13 +6,14 @@
       <GradleProjectSettings>
         <option name="testRunner" value="CHOOSE_PER_TEST" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/IainNotes" />
-        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/IainNotes" />
             <option value="$PROJECT_DIR$/IainNotes/app" />
           </set>
         </option>
+        <option name="myGradleHome" value="C:\iainslocalfiles\Gradle\gradle-8.10" />
       </GradleProjectSettings>
     </option>
   </component>

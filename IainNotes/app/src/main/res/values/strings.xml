@@ -1,4 +1,5 @@
-<resource>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
     <string name="app_name">Ttex Sans</string>
 	<!--
     TeleteX
@@ -7,4 +8,4 @@
     ttex
     -->
 	<string name="aboutLabelText">About\nVersion 0.1.0_main</string>
-</resource>
+</resources>
