@@ -34,7 +34,7 @@ class NoteAdapter(
         val pinned = notes.filter { it.pinned }
         val unpinned = notes.filter { !it.pinned }
         if (pinned.isNotEmpty()) {
-            items.add(Item.Header("Pins"))
+            //items.add(Item.Header("Pins"))
             items.addAll(pinned.map { Item.NoteItem(it) })
         }
         items.addAll(unpinned.map { Item.NoteItem(it) })
