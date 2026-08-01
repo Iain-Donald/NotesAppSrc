@@ -1,4 +1,4 @@
-package com.example.app.editor
+package com.example.iainnotes.editor
 
 import android.content.Context
 import android.util.AttributeSet

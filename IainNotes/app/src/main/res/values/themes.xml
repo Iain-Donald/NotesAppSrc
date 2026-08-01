@@ -19,5 +19,23 @@
         <item name="appDivider">@color/appDivider</item>
         <item name="appInputBackground">@color/appInputBackground</item>
     </style>
+    <style name="RoundedDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/dialog_bg</item>
+        <!-- title -->
+        <item name="android:textColorPrimary">@color/buttonL2</item>
+        <!-- Add / Cancel buttons -->
+        <item name="buttonBarPositiveButtonStyle">@style/DialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/DialogButton</item>
+        <!-- EditText text, hint, and underline tint -->
+        <item name="android:editTextColor">@color/buttonL1</item>
+        <item name="android:textColorHint">@color/buttonL2</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorControlNormal">@color/borderPrimary</item>
+        <item name="colorControlActivated">@color/accent_dark</item>
+    </style>
+    <style name="DialogButton" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/accent_dark</item>
+    </style>
 
 </resources>

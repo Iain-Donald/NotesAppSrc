@@ -23,6 +23,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -30,6 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iainnotes.databinding.ActivityMainBinding
 import com.example.iainnotes.databinding.DialogSearchBinding
+import com.example.iainnotes.databinding.ItemDialogalertBinding
 import kotlinx.coroutines.launch
 import androidx.core.graphics.drawable.toDrawable
 
@@ -90,12 +92,8 @@ class MainActivity : AppCompatActivity() {
                 )
             },
             onRename = { section ->
-                val input = EditText(this).apply {
-                    setText(section.name)
-                    hint = "Section name"
-                    setPadding(48, 24, 48, 24)
-                }
-                AlertDialog.Builder(this)
+                val input = inflateInput(section.name)
+                AlertDialog.Builder(this, R.style.RoundedDialog)
                     .setTitle("Rename Section")
                     .setView(input)
                     .setPositiveButton("Rename") { _, _ ->
@@ -111,7 +109,7 @@ class MainActivity : AppCompatActivity() {
                     .show()
             },
             onDelete = { section ->
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.RoundedDialog)
                     .setTitle("Delete \"${section.name}\"?")
                     .setMessage("All alarms in this section will also be deleted.")
                     .setPositiveButton("Delete") { _, _ ->
@@ -258,6 +256,14 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private fun inflateInput(prefill: String? = null): EditText {
+        val ctx = ContextThemeWrapper(this, R.style.RoundedDialog)
+        val input = layoutInflater.cloneInContext(ctx)
+            .inflate(R.layout.item_dialogalert, null) as EditText
+        prefill?.let { input.setText(it) }
+        return input
+    }
+
     private fun showLockDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_lock, null)
         val dialog = AlertDialog.Builder(this@MainActivity)
@@ -294,12 +300,50 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showAddSectionDialog() {
-        val input = EditText(this).apply {
+    /*private fun showAddSectionDialog() {
+        val ctx = ContextThemeWrapper(this, R.style.RoundedDialog)
+        val input = EditText(ctx).apply {
             hint = "Section name"
             setPadding(48, 24, 48, 24)
         }
-        AlertDialog.Builder(this)
+        AlertDialog.Builder(this, R.style.RoundedDialog)
+            .setTitle("New Section")
+            .setView(input)
+            .setPositiveButton("Add") { _, _ ->
+                lifecycleScope.launch {
+                    var name = input.text.toString().trim()
+                    if (name.isEmpty()) name = "Section"
+                    appData = DataStore.addSection(this@MainActivity, name)
+                    adapter.submitList(sortedSections())
+                    Toast.makeText(this@MainActivity, "Section \"$name\" added", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }*/
+    /*private fun showAddSectionDialog() {
+        val ctx = ContextThemeWrapper(this, R.style.RoundedDialog)
+        val binding = ItemDialogalertBinding.inflate(layoutInflater.cloneInContext(ctx))
+
+        AlertDialog.Builder(this, R.style.RoundedDialog)
+            .setTitle("New Section")
+            .setView(binding.root)
+            .setPositiveButton("Add") { _, _ ->
+                lifecycleScope.launch {
+                    var name = binding.sectionInput.text.toString().trim()
+                    if (name.isEmpty()) name = "Section"
+                    appData = DataStore.addSection(this@MainActivity, name)
+                    adapter.submitList(sortedSections())
+                    Toast.makeText(this@MainActivity, "Section \"$name\" added", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }*/
+
+    private fun showAddSectionDialog() {
+        val input = inflateInput()
+        AlertDialog.Builder(this, R.style.RoundedDialog)
             .setTitle("New Section")
             .setView(input)
             .setPositiveButton("Add") { _, _ ->

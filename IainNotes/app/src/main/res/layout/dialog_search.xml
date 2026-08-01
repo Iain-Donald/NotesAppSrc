@@ -77,7 +77,7 @@
 				android:id="@+id/dividerOptions"
 				android:layout_width="match_parent"
 				android:layout_height="1dp"
-				android:background="?attr/appDivider"
+				android:background="@color/appDivider"
 				android:layout_marginTop="8dp"
 				android:layout_marginBottom="8dp"
 				android:visibility="gone" />

@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.iainnotes.databinding.ActivityAddAlarmBinding
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class AddAlarmActivity : AppCompatActivity() {
@@ -35,7 +36,7 @@ class AddAlarmActivity : AppCompatActivity() {
                         binding.timePicker.hour = alarm.timeHour
                         binding.timePicker.minute = alarm.timeMinute
                         binding.etDisplayText.setText(alarm.displayText)
-                        binding.switchActive.isChecked = alarm.isActive
+                        //binding.switchActive.isChecked = alarm.isActive
                         binding.btnMon.isChecked = "MON" in alarm.repeatDays
                         binding.btnTue.isChecked = "TUE" in alarm.repeatDays
                         binding.btnWed.isChecked = "WED" in alarm.repeatDays
@@ -99,7 +100,7 @@ class AddAlarmActivity : AppCompatActivity() {
                     timeHour = binding.timePicker.hour,
                     timeMinute = binding.timePicker.minute,
                     displayText = displayText,
-                    isActive = binding.switchActive.isChecked,
+                    isActive = isActive,
                     repeatDays = repeatDays
                 )
 
