@@ -1,6 +1,7 @@
 package com.example.iainnotes
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -13,7 +14,8 @@ class SectionAdapter(
     private val onRename: (Section) -> Unit,
     private val onDelete: (Section) -> Unit,
     private val onPin: (Section) -> Unit,
-    private val onMove: (fromPos: Int, toPos: Int) -> Unit
+    private val onMove: (fromPos: Int, toPos: Int) -> Unit,
+    private var categories: List<Category> = emptyList()
 ) : ListAdapter<Section, SectionAdapter.ViewHolder>(DiffCallback()) {
 
     fun currentIds(): List<String> = (0 until itemCount).map { getItem(it).id }
@@ -23,6 +25,11 @@ class SectionAdapter(
         list.add(to, item)
         submitList(list)
         onMove(from, to)
+    }
+
+    fun updateCategories(list: List<Category>) {
+        categories = list
+        notifyDataSetChanged()
     }
 
     class ViewHolder(val binding: ItemSectionBinding) :
@@ -42,6 +49,14 @@ class SectionAdapter(
             true
         }
         holder.binding.btnDeleteSection.setOnClickListener { onDelete(section) }
+
+        val colorId = categories.find { it.id == section.categoryId }?.colorId ?: Palette.NONE
+        if (colorId == Palette.NONE) {
+            holder.binding.colorBar.visibility = View.GONE
+        } else {
+            holder.binding.colorBar.visibility = View.VISIBLE
+            holder.binding.colorBar.setBackgroundColor(Palette.colorOf(colorId))
+        }
 
         if (section.pinned) {
             holder.binding.btnPin.setImageResource(R.drawable.baseline_push_pin_24)

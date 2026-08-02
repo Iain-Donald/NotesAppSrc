@@ -14,7 +14,8 @@ material = "1.14.0"
 constraintlayout = "2.2.1"
 lifecycle = "2.11.0"
 activityKtx = "1.13.0"
-commonsCompress = "1.28.0" # tar archive support.
+commonsCompress = "1.28.0"
+gridlayout = "1.1.0" # tar archive support.
 
 [libraries] # todo: add a comment explaining the need for each one.
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -28,7 +29,8 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
-commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" } # tar archive support.
+commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" }
+androidx-gridlayout = { group = "androidx.gridlayout", name = "gridlayout", version.ref = "gridlayout" } # tar archive support.
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

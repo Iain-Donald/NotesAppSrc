@@ -23,7 +23,8 @@ data class Section(
     val modifiedAt: String = createdAt,
     val sortOrder: String = "date_created",  // "date_created", "alpha", "custom"
     val sortAsc: Boolean = true,
-    val pinned: Boolean = false
+    val pinned: Boolean = false,
+    val categoryId: String = ""
 )
 
 @Serializable
@@ -57,11 +58,11 @@ data class Alarm(
     val modifiedAt: String = createdAt
 )
 
-@Serializable
 data class AppData(
     val sections: List<Section> = emptyList(),
     val notes: List<Note> = emptyList(),
     val alarms: List<Alarm> = emptyList(),
+    val categories: List<Category> = emptyList(),
     val sectionSortOrder: String = "date_created",
     val sectionSortAsc: Boolean = true,
     val sectionCustomOrder: List<String> = emptyList()
@@ -78,7 +79,8 @@ data class SectionEntry(
     val modifiedAt: String = "",
     val sortOrder: String = "date_created",
     val sortAsc: Boolean = true,
-    val pinned: Boolean = false
+    val pinned: Boolean = false,
+    val categoryId: String = ""
 )
 
 @Serializable
@@ -92,6 +94,19 @@ data class NoteEntry(
     val modifiedAt: String = "",
     val notifyEnabled: Boolean = false,
     val pinned: Boolean = false
+)
+
+data class Category(
+    val id: String,
+    val name: String,
+    val colorId: Int = 0
+)
+
+@Serializable
+data class CategoryEntry(
+    val id: String,
+    val name: String,
+    val colorId: Int = 0
 )
 
 @Serializable
@@ -115,7 +130,8 @@ data class MapFile(
     val sections: List<SectionEntry> = emptyList(),
     val notes: List<NoteEntry> = emptyList(),
     val sectionSortOrder: String = "date_created",
-    val sectionSortAsc: Boolean = true
+    val sectionSortAsc: Boolean = true,
+    val categories: List<CategoryEntry> = emptyList()
 )
 
 @Serializable

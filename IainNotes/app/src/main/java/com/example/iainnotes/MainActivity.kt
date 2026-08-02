@@ -31,7 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iainnotes.databinding.ActivityMainBinding
 import com.example.iainnotes.databinding.DialogSearchBinding
-import com.example.iainnotes.databinding.ItemDialogalertBinding
+//import com.example.iainnotes.databinding.ItemDialogalertBinding
 import kotlinx.coroutines.launch
 import androidx.core.graphics.drawable.toDrawable
 
@@ -92,21 +92,48 @@ class MainActivity : AppCompatActivity() {
                 )
             },
             onRename = { section ->
-                val input = inflateInput(section.name)
-                AlertDialog.Builder(this, R.style.RoundedDialog)
-                    .setTitle("Rename Section")
-                    .setView(input)
-                    .setPositiveButton("Rename") { _, _ ->
-                        lifecycleScope.launch {
-                            val newName = input.text.toString().trim()
-                            if (newName.isNotEmpty()) {
-                                appData = DataStore.renameSection(this@MainActivity, section.id, newName)
-                                adapter.submitList(appData.sections.toList())
+                val view = ActivityBuilder.sectionEditor(
+                    this,
+                    section.name,
+                    section.categoryId,
+                    appData.categories,
+                    onCreateCategory = { done ->
+                        ActivityBuilder.newCategoryDialog(this) { name, colorId ->
+                            lifecycleScope.launch {
+                                appData = DataStore.addCategory(this@MainActivity, name, colorId)
+                                appData.categories.lastOrNull()?.let { done(it) }
                             }
                         }
+                    },
+                    onEditCategory = { cat, done ->
+                        ActivityBuilder.categoryDialog(
+                            this,
+                            existing = cat,
+                            onSubmit = { name, colorId ->
+                                lifecycleScope.launch {
+                                    appData = DataStore.updateCategory(this@MainActivity, cat.id, name, colorId)
+                                    done(appData.categories.find { it.id == cat.id })
+                                    adapter.updateCategories(appData.categories)
+                                    adapter.submitList(sortedSections())
+                                }
+                            },
+                            onDelete = {
+                                lifecycleScope.launch {
+                                    appData = DataStore.deleteCategory(this@MainActivity, cat.id)
+                                    done(null)
+                                    adapter.updateCategories(appData.categories)
+                                    adapter.submitList(sortedSections())
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Group \"${cat.name}\" deleted",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        )
                     }
-                    .setNegativeButton("Cancel", null)
-                    .show()
+                )
+                // ... rest of the rename dialog unchanged
             },
             onDelete = { section ->
                 AlertDialog.Builder(this, R.style.RoundedDialog)
@@ -115,6 +142,7 @@ class MainActivity : AppCompatActivity() {
                     .setPositiveButton("Delete") { _, _ ->
                         lifecycleScope.launch {
                             appData = DataStore.deleteSection(this@MainActivity, section.id)
+                            adapter.updateCategories(appData.categories)
                             adapter.submitList(sortedSections())
                         }
                     }
@@ -125,6 +153,7 @@ class MainActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     try {
                         appData = DataStore.toggleSectionPin(this@MainActivity, section.id)
+                        adapter.updateCategories(appData.categories)
                         adapter.submitList(sortedSections())
                     } catch (e: Exception) { handleDataStoreError(e) }
                 }
@@ -155,6 +184,7 @@ class MainActivity : AppCompatActivity() {
                             appData = DataStore.updateAppSectionSort(
                                 this@MainActivity, currentSortOrder, currentSortAsc
                             )
+                            adapter.updateCategories(appData.categories)
                             adapter.submitList(sortedSections())
                         } catch (e: Exception) { handleDataStoreError(e) }
                     }
@@ -173,6 +203,7 @@ class MainActivity : AppCompatActivity() {
                     appData = DataStore.updateAppSectionSort(
                         this@MainActivity, currentSortOrder, currentSortAsc
                     )
+                    adapter.updateCategories(appData.categories)
                     adapter.submitList(sortedSections())
                 } catch (e: Exception) { handleDataStoreError(e) }
             }
@@ -232,6 +263,7 @@ class MainActivity : AppCompatActivity() {
                     else R.drawable.outline_arrow_downward_24
                 )
                 spinnerReady = true
+                adapter.updateCategories(appData.categories)
                 adapter.submitList(sortedSections())
             } catch (e: Exception) {
                 handleDataStoreError(e)
@@ -351,6 +383,7 @@ class MainActivity : AppCompatActivity() {
                     var name = input.text.toString().trim()
                     if (name.isEmpty()) name = "Section"
                     appData = DataStore.addSection(this@MainActivity, name)
+                    adapter.updateCategories(appData.categories)
                     adapter.submitList(sortedSections())
                     Toast.makeText(this@MainActivity, "Section \"$name\" added", Toast.LENGTH_SHORT).show()
                 }

@@ -14,7 +14,6 @@ import com.example.iainnotes.databinding.ActivitySettingsBinding
 import kotlinx.coroutines.launch
 
 class SettingsActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivitySettingsBinding
     private var prefs = PreferencesManager.load()
 
@@ -49,7 +48,6 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(Intent(this@SettingsActivity, ExportActivity::class.java))
         }
 
-
         var listeningToRadio = false
         binding.radioTheme.setOnCheckedChangeListener { _, checkedId ->
             if (!listeningToRadio) return@setOnCheckedChangeListener
@@ -77,7 +75,6 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchLockOnClose.isChecked = prefs.lockOnClose
         binding.switchLockOnClose.isEnabled = prefs.usePassphrase
         binding.tvLockOnCloseLabel.alpha = if (prefs.usePassphrase) 1f else 0.4f
-
         // Show change pw button only when passphrase is enabled.
         binding.btnChangePassphrase.visibility =
             if (prefs.usePassphrase) View.VISIBLE else View.GONE

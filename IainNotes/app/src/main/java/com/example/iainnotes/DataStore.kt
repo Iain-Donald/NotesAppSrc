@@ -214,8 +214,6 @@ object DataStore {
         return load(context)
     }
 
-
-
     suspend fun load(context: Context): AppData = withContext(Dispatchers.IO) {
         if (cacheValid && cachedAppData != null) {
             return@withContext cachedAppData!!
@@ -223,6 +221,10 @@ object DataStore {
         try {
             val map = loadMap()
             val alarmEntries = loadAlarmsDirect()
+
+            val categories = map.categories.map {
+                Category(id = it.id, name = it.name, colorId = it.colorId)
+            }
 
             val sections = map.sections.map {
                 Section(
@@ -232,7 +234,8 @@ object DataStore {
                     modifiedAt = it.modifiedAt,
                     sortOrder = it.sortOrder,
                     sortAsc = it.sortAsc,
-                    pinned = it.pinned
+                    pinned = it.pinned,
+                    categoryId = it.categoryId
                 )
             }
 
@@ -269,7 +272,7 @@ object DataStore {
                 )
             }
 
-            AppData(sections = sections, notes = notes, alarms = alarms, sectionSortOrder = map.sectionSortOrder, sectionSortAsc = map.sectionSortAsc).also {
+            AppData(sections = sections, notes = notes, alarms = alarms, categories = categories, sectionSortOrder = map.sectionSortOrder, sectionSortAsc = map.sectionSortAsc).also {
                 cachedAppData = it
                 cacheValid = true
             }
@@ -583,5 +586,53 @@ object DataStore {
         }
 
         output
+    }
+
+    suspend fun addCategory(context: Context, name: String, colorId: Int): AppData {
+        val map = loadMap()
+        val entry = CategoryEntry(id = generateId("c"), name = name, colorId = colorId)
+        saveMap(map.copy(categories = map.categories + entry))
+        commit()
+        return load(context)
+    }
+
+    suspend fun updateCategory(context: Context, categoryId: String, name: String, colorId: Int): AppData {
+        val map = loadMap()
+        saveMap(map.copy(
+            categories = map.categories.map {
+                if (it.id == categoryId) it.copy(name = name, colorId = colorId) else it
+            }
+        ))
+        commit()
+        return load(context)
+    }
+
+    suspend fun deleteCategory(context: Context, categoryId: String): AppData {
+        val map = loadMap()
+        saveMap(map.copy(
+            categories = map.categories.filter { it.id != categoryId },
+            sections = map.sections.map {
+                if (it.categoryId == categoryId) it.copy(
+                    categoryId = "",
+                    modifiedAt = currentTimestamp()
+                ) else it
+            }
+        ))
+        commit()
+        return load(context)
+    }
+
+    suspend fun setSectionCategory(context: Context, sectionId: String, categoryId: String): AppData {
+        val map = loadMap()
+        saveMap(map.copy(
+            sections = map.sections.map {
+                if (it.id == sectionId) it.copy(
+                    categoryId = categoryId,
+                    modifiedAt = currentTimestamp()
+                ) else it
+            }
+        ))
+        commit()
+        return load(context)
     }
 }
