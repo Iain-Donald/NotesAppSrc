@@ -194,7 +194,8 @@ class NoteDetailActivity : AppCompatActivity() {
                         val updated = note.copy(notifyEnabled = !note.notifyEnabled)
                         android.util.Log.d("NOTIFY", "note.notifyEnabled before: ${note.notifyEnabled}")
                         android.util.Log.d("NOTIFY", "updated.notifyEnabled: ${updated.notifyEnabled}")
-                        DataStore.updateNote(this@NoteDetailActivity, updated)
+                        //DataStore.updateNote(this@NoteDetailActivity, updated)
+                        DataStore.setNoteNotify(this@NoteDetailActivity, noteId, updated.notifyEnabled)
                         val check = DataStore.load(this@NoteDetailActivity)
                         android.util.Log.d("NOTIFY", "after load notifyEnabled: ${check.notes.find { it.id == noteId }?.notifyEnabled}")
                         if (updated.notifyEnabled) {

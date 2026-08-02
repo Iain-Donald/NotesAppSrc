@@ -14,6 +14,7 @@ class NoteAdapter(
     private val onTap: (Note) -> Unit,
     private val onPin: (Note) -> Unit,
     private val onNotifyToggle: (Note, Boolean) -> Unit,
+    private val onRename: (Note) -> Unit,
     private val onDelete: (Note) -> Unit
 ) : ListAdapter<NoteAdapter.Item, RecyclerView.ViewHolder>(DiffCallback()) {
 
@@ -111,7 +112,8 @@ class NoteAdapter(
         holder.binding.btnDeleteNote.setOnClickListener { onDelete(note) }
         holder.binding.root.setOnClickListener { onTap(note) }
         holder.binding.root.setOnLongClickListener {
-            onDelete(note)
+            //onDelete(note)
+            onRename(note)
             true
         }
     }

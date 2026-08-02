@@ -36,6 +36,8 @@ object CryptoManager {
     }
 
     fun decrypt(data: ByteArray, passphrase: CharArray): ByteArray {
+        if (data.size < SALT_LENGTH + IV_LENGTH + GCM_TAG_BITS / 8) throw CorruptContainerException("Decryption error: Incorrect or corrupted file.")
+
         val salt = data.sliceArray(0 until SALT_LENGTH)
         val iv = data.sliceArray(SALT_LENGTH until SALT_LENGTH + IV_LENGTH)
         val ciphertext = data.sliceArray(SALT_LENGTH + IV_LENGTH until data.size)
@@ -45,3 +47,5 @@ object CryptoManager {
         return cipher.doFinal(ciphertext)
     }
 }
+
+class CorruptContainerException(message: String) : Exception(message)

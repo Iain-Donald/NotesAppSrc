@@ -17,7 +17,6 @@ class SectionAdapter(
 ) : ListAdapter<Section, SectionAdapter.ViewHolder>(DiffCallback()) {
 
     fun currentIds(): List<String> = (0 until itemCount).map { getItem(it).id }
-
     fun moveItem(from: Int, to: Int) {
         val list = currentList.toMutableList()
         val item = list.removeAt(from)
@@ -25,7 +24,8 @@ class SectionAdapter(
         submitList(list)
         onMove(from, to)
     }
-    inner class ViewHolder(val binding: ItemSectionBinding) :
+
+    class ViewHolder(val binding: ItemSectionBinding) :
         RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =

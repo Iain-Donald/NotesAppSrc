@@ -24,8 +24,7 @@ object DataStore {
         Environment.getExternalStorageDirectory(), "IainNotes/IainNotes.tar"
     )
 
-    private fun containerFile() =
-        if (noPassphraseMode) containerFilePlain() else containerFileEnc()
+    private fun containerFile() = if (noPassphraseMode) containerFilePlain() else containerFileEnc()
 
     fun hasContainer() = containerFileEnc().exists() || containerFilePlain().exists()
 
@@ -91,12 +90,21 @@ object DataStore {
         containerFilePlain().delete()
     }
 
-    suspend fun removePassphrase() {
+    /*suspend fun removePassphrase() {
         noPassphraseMode = true
         passphrase.fill('\u0000')
         passphrase = charArrayOf()
         commit()  // writes plain .tar
         // Clean up the old .enc file if it exists
+        containerFileEnc().delete()
+    }*/
+
+    suspend fun removePassphrase() {
+        val old = passphrase
+        noPassphraseMode = true
+        commit()
+        old.fill('\u0000')
+        passphrase = charArrayOf()
         containerFileEnc().delete()
     }
 
@@ -333,7 +341,8 @@ object DataStore {
     suspend fun addNote(context: Context, note: Note): AppData {
         val map = loadMap()
         val sectionEntry = map.sections.find { it.id == note.sectionId } ?: return load(context)
-        val fileName = "${note.id}-${sanitizeName(note.title)}.txt"
+        //val fileName = "${note.id}-${sanitizeName(note.title)}.txt"
+        val fileName = noteFileName(note.id, note.title)
         val path = "userData/sections/${sectionEntry.folderName}/$fileName"
         val now = currentTimestamp()
         val entry = NoteEntry(
@@ -351,17 +360,46 @@ object DataStore {
         return load(context)
     }
 
+    private fun noteFileName(id: String, title: String) = "$id-${sanitizeName(title)}.txt"
+
+    suspend fun renameNote(context: Context, noteId: String, newTitle: String): AppData {
+        val map = loadMap()
+        val noteEntry = map.notes.find { it.id == noteId } ?: return load(context)
+        val sectionEntry = map.sections.find { it.id == noteEntry.sectionId } ?: return load(context)
+        val newFileName = if (sanitizeName(newTitle) != sanitizeName(noteEntry.title)) {
+            val name = noteFileName(noteId, newTitle)
+            val oldPath = "userData/sections/${sectionEntry.folderName}/${noteEntry.fileName}"
+            val newPath = "userData/sections/${sectionEntry.folderName}/$name"
+            files[newPath] = files.remove(oldPath) ?: byteArrayOf()
+            name
+        } else noteEntry.fileName
+        saveMap(map.copy(
+            notes = map.notes.map {
+                if (it.id == noteId) it.copy(
+                    title = newTitle,
+                    fileName = newFileName,
+                    modifiedAt = currentTimestamp()
+                )
+                else it
+            }
+        ))
+        commit()
+        return load(context)
+    }
+
     suspend fun updateNote(context: Context, note: Note): AppData {
         val map = loadMap()
         val noteEntry = map.notes.find { it.id == note.id } ?: return load(context)
         val sectionEntry = map.sections.find { it.id == note.sectionId } ?: return load(context)
         val newFileName = if (sanitizeName(note.title) != sanitizeName(noteEntry.title)) {
-            val newName = "${note.id}-${sanitizeName(note.title)}.txt"
+            //val newName = "${note.id}-${sanitizeName(note.title)}.txt"
+            val newName = noteFileName(note.id, note.title)
             val oldPath = "userData/sections/${sectionEntry.folderName}/${noteEntry.fileName}"
             val newPath = "userData/sections/${sectionEntry.folderName}/$newName"
             files[newPath] = files.remove(oldPath) ?: byteArrayOf()
             newName
         } else noteEntry.fileName
+        val newName = noteFileName(note.id, note.title)
         val updatedEntry = noteEntry.copy(
             title = note.title,
             fileName = newFileName,
@@ -371,6 +409,18 @@ object DataStore {
         )
         writeText("userData/sections/${sectionEntry.folderName}/${updatedEntry.fileName}", note.content)
         saveMap(map.copy(notes = map.notes.map { if (it.id == note.id) updatedEntry else it }))
+        commit()
+        return load(context)
+    }
+
+    suspend fun setNoteNotify(context: Context, noteId: String, enabled: Boolean): AppData {
+        val map = loadMap()
+        saveMap(map.copy(
+            notes = map.notes.map {
+                if (it.id == noteId) it.copy(notifyEnabled = enabled, modifiedAt = currentTimestamp())
+                else it
+            }
+        ))
         commit()
         return load(context)
     }
@@ -512,7 +562,7 @@ object DataStore {
     }
 
     suspend fun export(encrypted: Boolean): File = withContext(Dispatchers.IO) {
-        val fileName = if (encrypted) "IainNotes-export.tar.enc" else "IainNotes-export.tar"
+        val fileName = if (encrypted) "XyzNotes-export.tar.enc" else "XyzNotes-export.tar"
         val output = File(Environment.getExternalStorageDirectory(), "IainNotes/$fileName")
 
         val packed = TarManager.pack(files)

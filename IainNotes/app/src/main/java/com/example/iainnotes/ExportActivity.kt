@@ -41,11 +41,11 @@ class ExportActivity : AppCompatActivity() {
     private fun showExportConfirmDialog(encrypted: Boolean) {
         val title = if (encrypted) "Export encrypted" else "Export decrypted"
         val message = if (encrypted)
-            "Exports as IainNotes-export.tar.enc — requires your passphrase to open on any device."
+            "Export as XyzNotes-export.tar.enc, will require your passphrase to open."
         else
-            "Exports as IainNotes-export.tar — contents are readable by anyone with the file."
+            "Export as XyzNotes-export.tar, contents readable by anyone with the file."
 
-        AlertDialog.Builder(this@ExportActivity)
+        ActivityBuilder.dialog(this@ExportActivity)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton("Export") { _, _ ->

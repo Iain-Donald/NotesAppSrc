@@ -64,8 +64,31 @@ class SectionActivity : AppCompatActivity() {
                     } catch (e: Exception) { handleDataStoreError(e) }
                 }
             },
+            onRename = { note ->
+                val input = ActivityBuilder.input(this, note.title)
+                ActivityBuilder.dialog(this)
+                    .setTitle("Rename Note")
+                    .setView(input)
+                    .setPositiveButton("Rename") { _, _ ->
+                        lifecycleScope.launch {
+                            try {
+                                val newTitle = input.text.toString().trim()
+                                if (newTitle.isNotEmpty()) {
+                                    val updated = DataStore.renameNote(this@SectionActivity, note.id, newTitle)
+                                    cachedAppData = updated
+                                    adapter.updateAlarms(updated.alarms)
+                                    adapter.submitNotes(
+                                        sortedNotes(updated, updated.notes.filter { it.sectionId == sectionId })
+                                    )
+                                }
+                            } catch (e: Exception) { handleDataStoreError(e) }
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            },
             onDelete = { note ->
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.RoundedDialog)
                     .setTitle("Delete \"${note.title}\"?")
                     .setMessage("Any alarm attached to this note will also be deleted.")
                     .setPositiveButton("Delete") { _, _ ->
