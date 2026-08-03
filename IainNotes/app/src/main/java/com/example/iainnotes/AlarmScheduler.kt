@@ -108,9 +108,26 @@ object AlarmScheduler {
         }
     }
 
-    /*fun rescheduleAll(context: Context) {
+    /** Schedules a single firing at an exact epoch time, ignoring repeatDays.
+     *  Used for snooze, where hour/minute alone loses the date. */
+    @SuppressLint("ScheduleExactAlarm")
+    fun scheduleAt(context: Context, alarm: Alarm, triggerAtMillis: Long) {
         if (!canScheduleExact(context)) return
-        val data = DataStore.load(context)
-        data.alarms.filter { it.isActive }.forEach { schedule(context, it) }
-    }*/
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("alarmId", alarm.id)
+            putExtra("alarmName", alarm.name)
+            putExtra("displayText", alarm.displayText)
+            putExtra("isSnooze", true)          // receiver must not re-arm or deactivate on this
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            "${alarm.id}_snooze".hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent
+        )
+    }
 }

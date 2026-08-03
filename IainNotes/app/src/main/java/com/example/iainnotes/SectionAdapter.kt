@@ -45,7 +45,9 @@ class SectionAdapter(
         holder.binding.tvSectionName.text = section.name
         holder.binding.root.setOnClickListener { onClick(section) }
         holder.binding.root.setOnLongClickListener {
+            android.util.Log.d("DROPDOWN", "long press on ${section.name}")
             onRename(section)
+            android.util.Log.d("DROPDOWN", "onRename returned")
             true
         }
         holder.binding.btnDeleteSection.setOnClickListener { onDelete(section) }

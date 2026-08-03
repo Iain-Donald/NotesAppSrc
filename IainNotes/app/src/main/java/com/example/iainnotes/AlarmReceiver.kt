@@ -3,43 +3,41 @@ package com.example.iainnotes
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Environment
-import kotlinx.serialization.json.Json
-import java.io.File
 
 class AlarmReceiver : BroadcastReceiver() {
-    private val json = Json { ignoreUnknownKeys = true }
 
     override fun onReceive(context: Context, intent: Intent) {
         val alarmId = intent.getStringExtra("alarmId") ?: return
+        val isSnooze = intent.getBooleanExtra("isSnooze", false)
 
-        // Read alarms.json directly — no decryption needed
-        val alarmsFile = File(
-            Environment.getExternalStorageDirectory(),
-            "IainNotes/userData/alarms.json"
-        )
-        if (!alarmsFile.exists()) return
+        val entries = AlarmStore.loadOrEmpty()
+        val entry = entries.find { it.id == alarmId } ?: return
 
-        val text = try { alarmsFile.readText() } catch (_: Exception) { return }
+        val alarm = entry.toAlarm()
 
-        val alarms: List<AlarmEntry> = try {
-            if (text.trimStart().startsWith("[")) {
-                json.decodeFromString<List<AlarmEntry>>(text)
+        // Re-arm BEFORE showing UI: setExactAndAllowWhileIdle is one-shot, so a
+        // repeating alarm that isn't re-armed here never fires again.
+        if (!isSnooze) {
+            if (alarm.repeatDays.isNotEmpty()) {
+                // schedule() recomputes each day's next occurrence; the day that just
+                // fired is now in the past, so it rolls forward a week. Correct.
+                AlarmScheduler.schedule(context, alarm)
             } else {
-                json.decodeFromString<AlarmsFile>(text).alarms
+                // One-shot has now been consumed — reflect that in stored state.
+                AlarmStore.save(entries.map {
+                    if (it.id == alarmId) it.copy(isActive = false) else it
+                })
             }
-        } catch (e: Exception) {
-            return
         }
 
-        val alarm = alarms.find { it.id == alarmId } ?: return
-
-        val notificationIntent = Intent(context, AlarmAlertActivity::class.java).apply {
-            putExtra("alarmId", alarm.id)
-            putExtra("alarmName", alarm.name)
-            putExtra("displayText", alarm.displayText)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        context.startActivity(notificationIntent)
+        context.startActivity(
+            Intent(context, AlarmAlertActivity::class.java).apply {
+                putExtra("alarmId", alarm.id)
+                putExtra("alarmName", alarm.name)
+                putExtra("displayText", alarm.displayText)
+                putExtra("repeatDays", alarm.repeatDays.toTypedArray())
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+        )
     }
 }

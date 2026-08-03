@@ -1,7 +1,7 @@
 package com.example.iainnotes
 
-import android.app.AlarmManager
 import android.app.Dialog
+import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -23,7 +23,6 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -65,21 +64,6 @@ class MainActivity : AppCompatActivity() {
                 arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
                 1002
             )
-        }
-
-        val alarmManager = getSystemService(AlarmManager::class.java)
-        if (!alarmManager.canScheduleExactAlarms()) {
-            AlertDialog.Builder(this)
-                .setTitle("Permission needed")
-                .setMessage("To fire alarms at exact times, please enable 'Alarms & Reminders' for this app in settings.")
-                .setPositiveButton("Open Settings") { _, _ ->
-                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                        data = "package:$packageName".toUri()
-                    }
-                    startActivity(intent)
-                }
-                .setNegativeButton("Not now", null)
-                .show()
         }
 
         adapter = SectionAdapter(
@@ -133,7 +117,27 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                 )
-                // ... rest of the rename dialog unchanged
+                val input = view.findViewById<EditText>(R.id.sectionInput)
+
+                ActivityBuilder.dialog(this)
+                    .setTitle("Rename Section")
+                    .setView(view)
+                    .setPositiveButton("Rename") { _, _ ->
+                        lifecycleScope.launch {
+                            val newName = input.text.toString().trim()
+                            val newCat = ActivityBuilder.selectedCategoryId(view)
+                            if (newName.isNotEmpty() && newName != section.name) {
+                                appData = DataStore.renameSection(this@MainActivity, section.id, newName)
+                            }
+                            if (newCat != section.categoryId) {
+                                appData = DataStore.setSectionCategory(this@MainActivity, section.id, newCat)
+                            }
+                            adapter.updateCategories(appData.categories)
+                            adapter.submitList(sortedSections())
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
             },
             onDelete = { section ->
                 AlertDialog.Builder(this, R.style.RoundedDialog)
@@ -141,9 +145,19 @@ class MainActivity : AppCompatActivity() {
                     .setMessage("All alarms in this section will also be deleted.")
                     .setPositiveButton("Delete") { _, _ ->
                         lifecycleScope.launch {
-                            appData = DataStore.deleteSection(this@MainActivity, section.id)
-                            adapter.updateCategories(appData.categories)
-                            adapter.submitList(sortedSections())
+                            try {
+                                val data = DataStore.load(this@MainActivity)
+                                val doomedNotes = data.notes.filter { it.sectionId == section.id }
+                                data.alarms
+                                    .filter { a -> doomedNotes.any { it.id == a.noteId } }
+                                    .forEach { AlarmScheduler.cancel(this@MainActivity, it) }
+                                doomedNotes.forEach {
+                                    NoteNotificationManager.cancel(this@MainActivity, it.id)
+                                }
+                                appData = DataStore.deleteSection(this@MainActivity, section.id)
+                                adapter.updateCategories(appData.categories)
+                                adapter.submitList(sortedSections())
+                            } catch (e: Exception) { handleDataStoreError(e) }
                         }
                     }
                     .setNegativeButton("Cancel", null)
@@ -231,6 +245,18 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         NoteNotificationManager.createChannel(this)
 
+        val nm = getSystemService(NotificationManager::class.java)
+        if (!nm.isNotificationPolicyAccessGranted) {
+            ActivityBuilder.dialog(this)
+                .setTitle("Allow reminders during Do Not Disturb?")
+                .setMessage("Note reminders will be silenced by Do Not Disturb unless you grant this.")
+                .setPositiveButton("Open Settings") { _, _ ->
+                    startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+                }
+                .setNegativeButton("Not now", null)
+                .show()
+        }
+
         if (intent.getBooleanExtra("lock_and_close", false)) {
             finish()
             return
@@ -286,14 +312,6 @@ class MainActivity : AppCompatActivity() {
             appData.sectionSortOrder,
             appData.sectionSortAsc
         )
-    }
-
-    private fun inflateInput(prefill: String? = null): EditText {
-        val ctx = ContextThemeWrapper(this, R.style.RoundedDialog)
-        val input = layoutInflater.cloneInContext(ctx)
-            .inflate(R.layout.item_dialogalert, null) as EditText
-        prefill?.let { input.setText(it) }
-        return input
     }
 
     private fun showLockDialog() {
@@ -374,7 +392,7 @@ class MainActivity : AppCompatActivity() {
     }*/
 
     private fun showAddSectionDialog() {
-        val input = inflateInput()
+        val input = ActivityBuilder.input(this)
         AlertDialog.Builder(this, R.style.RoundedDialog)
             .setTitle("New Section")
             .setView(input)

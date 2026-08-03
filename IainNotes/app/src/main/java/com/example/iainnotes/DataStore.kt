@@ -32,7 +32,7 @@ object DataStore {
 
     suspend fun initEmpty(context: Context) {
         saveMap(MapFile())
-        saveAlarmsDirect(emptyList())
+        AlarmStore.save(emptyList())
         commit()
     }
 
@@ -81,6 +81,8 @@ object DataStore {
         cachedAppData = null
         cacheValid = false
     }
+
+    fun invalidateCache() { cacheValid = false }
 
     suspend fun setPassphrase(newPassphrase: CharArray) {
         passphrase = newPassphrase
@@ -220,7 +222,7 @@ object DataStore {
         }
         try {
             val map = loadMap()
-            val alarmEntries = loadAlarmsDirect()
+            val alarmEntries = AlarmStore.load()
 
             val categories = map.categories.map {
                 Category(id = it.id, name = it.name, colorId = it.colorId)
@@ -330,7 +332,7 @@ object DataStore {
         val entry = map.sections.find { it.id == sectionId } ?: return load(context)
         deletePrefix("userData/sections/${entry.folderName}/")
         val deletedNoteIds = map.notes.filter { it.sectionId == sectionId }.map { it.id }
-        saveAlarmsDirect(loadAlarmsDirect().filter { it.noteId !in deletedNoteIds })
+        AlarmStore.save(AlarmStore.load().filter { it.noteId !in deletedNoteIds })
         saveMap(map.copy(
             sections = map.sections.filter { it.id != sectionId },
             notes = map.notes.filter { it.sectionId != sectionId }
@@ -433,7 +435,7 @@ object DataStore {
         val noteEntry = map.notes.find { it.id == noteId } ?: return load(context)
         val sectionEntry = map.sections.find { it.id == noteEntry.sectionId } ?: return load(context)
         deleteFile("userData/sections/${sectionEntry.folderName}/${noteEntry.fileName}")
-        saveAlarmsDirect(loadAlarmsDirect().filter { it.noteId != noteId })
+        AlarmStore.save(AlarmStore.load().filter { it.noteId != noteId })
         saveMap(map.copy(
             notes = map.notes.filter { it.id != noteId },
         ))
@@ -493,7 +495,7 @@ object DataStore {
             createdAt = IdGenerator.decodeId(alarm.id.substringAfter("t")) ?: now,
             modifiedAt = now
         )
-        saveAlarmsDirect(loadAlarmsDirect() + entry)
+        AlarmStore.save(AlarmStore.load() + entry)
         val map = loadMap()
         saveMap(map.copy(
             notes = map.notes.map {
@@ -505,7 +507,7 @@ object DataStore {
     }
 
     suspend fun updateAlarm(context: Context, alarm: Alarm): AppData {
-        saveAlarmsDirect(loadAlarmsDirect().map {
+        AlarmStore.save(AlarmStore.load().map {
             if (it.id == alarm.id) AlarmEntry(
                 id = alarm.id,
                 noteId = alarm.noteId,
@@ -525,7 +527,7 @@ object DataStore {
     }
 
     suspend fun deleteAlarm(context: Context, alarmId: String): AppData {
-        saveAlarmsDirect(loadAlarmsDirect().filter { it.id != alarmId })
+        AlarmStore.save(AlarmStore.load().filter { it.id != alarmId })
         val map = loadMap()
         saveMap(map.copy(
             notes = map.notes.map {
@@ -534,34 +536,6 @@ object DataStore {
         ))
         commit()
         return load(context)
-    }
-
-    private fun alarmsJsonFile() = File(
-        Environment.getExternalStorageDirectory(),
-        "IainNotes/userData/alarms.json"
-    ).also { it.parentFile?.mkdirs() }
-
-    private fun loadAlarmsDirect(): List<AlarmEntry> {
-        val f = alarmsJsonFile()
-        if (!f.exists()) return emptyList()
-        return try {
-            val text = f.readText()
-            // Handle legacy format — plain array from before versioning
-            if (text.trimStart().startsWith("[")) {
-                val alarms = json.decodeFromString<List<AlarmEntry>>(text)
-                // Migrate to new format immediately
-                saveAlarmsDirect(alarms)
-                alarms
-            } else {
-                json.decodeFromString<AlarmsFile>(text).alarms
-            }
-        } catch (e: Exception) {
-            throw DataStoreException("alarms.json is corrupt or unreadable: ${e.message}", e)
-        }
-    }
-
-    private fun saveAlarmsDirect(alarms: List<AlarmEntry>) {
-        alarmsJsonFile().writeText(json.encodeToString(AlarmsFile(alarms = alarms)))
     }
 
     suspend fun export(encrypted: Boolean): File = withContext(Dispatchers.IO) {

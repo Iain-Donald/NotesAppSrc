@@ -147,3 +147,11 @@ fun sanitizeName(name: String): String =
         .replace(Regex("[^a-zA-Z0-9 _-]"), "")
         .replace(" ", "_")
         .take(64)
+
+fun AlarmEntry.toAlarm() = Alarm(
+    id = id, noteId = noteId, sectionId = sectionId, name = name,
+    timeHour = timeHour, timeMinute = timeMinute, displayText = displayText,
+    isActive = isActive, repeatDays = repeatDays,
+    createdAt = createdAt.ifEmpty { currentTimestamp() },
+    modifiedAt = modifiedAt
+)

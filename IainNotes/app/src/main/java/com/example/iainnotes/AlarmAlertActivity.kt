@@ -39,25 +39,24 @@ class AlarmAlertActivity : AppCompatActivity() {
             finish()
         }
 
+        val repeatDays = intent.getStringArrayExtra("repeatDays")?.toList() ?: emptyList()
+
         binding.btnSnooze.setOnClickListener {
             stopAlarmSound()
-            // Reschedule 10 minutes from now
-            lifecycleScope.launch {
-                val data = DataStore.load(this@AlarmAlertActivity)
-                val alarm = data.alarms.find { it.id == alarmId }
-                if (alarm != null) {
-                    val snoozed = alarm.copy(
-                        timeHour = (Calendar.getInstance().also {
-                            it.add(Calendar.MINUTE, 10)
-                        }.get(Calendar.HOUR_OF_DAY)),
-                        timeMinute = (Calendar.getInstance().also {
-                            it.add(Calendar.MINUTE, 10)
-                        }.get(Calendar.MINUTE)),
-                        repeatDays = emptyList()
-                    )
-                    AlarmScheduler.schedule(this@AlarmAlertActivity, snoozed)
-                }
-            }
+            val snoozeAt = System.currentTimeMillis() + 10 * 60 * 1000L
+            AlarmScheduler.scheduleAt(
+                this,
+                Alarm(
+                    id = alarmId,
+                    noteId = "", sectionId = "",
+                    name = alarmName,
+                    timeHour = 0, timeMinute = 0,          // unused by scheduleAt
+                    displayText = displayText,
+                    isActive = true,
+                    repeatDays = repeatDays
+                ),
+                snoozeAt
+            )
             finish()
         }
     }

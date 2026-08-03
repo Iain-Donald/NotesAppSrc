@@ -1,6 +1,7 @@
 package com.example.iainnotes
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.iainnotes.databinding.ActivityAddNoteBinding
@@ -26,6 +27,7 @@ class AddNoteActivity : AppCompatActivity() {
         val editNoteId = intent.getStringExtra("editNoteId")
 
         if (editNoteId != null) {
+            binding.btnSaveNote.isEnabled = false              // ← add
             lifecycleScope.launch {
                 try {
                     val data = DataStore.load(this@AddNoteActivity)
@@ -35,8 +37,10 @@ class AddNoteActivity : AppCompatActivity() {
                         binding.etNoteTitle.setText(note.title)
                         binding.etNoteContent.setText(note.content)
                     }
-                }  catch (e: Exception) {
+                } catch (e: Exception) {
                     handleDataStoreError(e)
+                } finally {
+                    binding.btnSaveNote.isEnabled = true       // ← add
                 }
             }
         } else {
@@ -48,27 +52,36 @@ class AddNoteActivity : AppCompatActivity() {
 
     private fun saveNote() {
         var title = binding.etNoteTitle.text.toString().trim()
-        if (title.isEmpty()) {
-            //Toast.makeText(this, "Title is required", Toast.LENGTH_SHORT).show()
-            title = "Title"
-            //return
-        }
-        val existing = existingNote
-        val note = Note(
-            id = existing?.id ?: generateId("n"),
-            sectionId = existing?.sectionId ?: sectionId,
-            title = title,
-            content = binding.etNoteContent.text.toString(),
-            notifyEnabled = existing?.notifyEnabled ?: false,
-            pinned = existing?.pinned ?: false
-        )
+        if (title.isEmpty()) title = "Title"
+        val content = binding.etNoteContent.text.toString()
+        val editNoteId = intent.getStringExtra("editNoteId")
+
         lifecycleScope.launch {
-            if (existing != null) {
-                DataStore.updateNote(this@AddNoteActivity, note)
-            } else {
-                DataStore.addNote(this@AddNoteActivity, note)
-            }
-            finish()
+            try {
+                val data = DataStore.load(this@AddNoteActivity)
+                // Re-resolve from freshly loaded data — never trust a field written by
+                // the onCreate coroutine, which may belong to a discarded instance.
+                val existing = editNoteId?.let { id -> data.notes.find { it.id == id } }
+
+                if (editNoteId != null && existing == null) {
+                    Toast.makeText(this@AddNoteActivity,
+                        "Could not find note to edit", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                val note = Note(
+                    id = existing?.id ?: generateId("n"),
+                    sectionId = existing?.sectionId ?: sectionId,
+                    title = title,
+                    content = content,
+                    createdAt = existing?.createdAt ?: currentTimestamp(),
+                    notifyEnabled = existing?.notifyEnabled ?: false,
+                    pinned = existing?.pinned ?: false
+                )
+                if (existing != null) DataStore.updateNote(this@AddNoteActivity, note)
+                else DataStore.addNote(this@AddNoteActivity, note)
+                finish()
+            } catch (e: Exception) { handleDataStoreError(e) }
         }
     }
 }

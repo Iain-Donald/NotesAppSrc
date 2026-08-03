@@ -4,21 +4,19 @@ import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
-//import androidx.gridlayout.widget.GridLayout
 import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintProperties.WRAP_CONTENT
-import com.example.iainnotes.Palette
-import com.example.iainnotes.R
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 
 object ActivityBuilder {
 
@@ -161,7 +159,7 @@ object ActivityBuilder {
 
 		val dot = root.findViewById<View>(R.id.colorDot)
 		val label = root.findViewById<TextView>(R.id.tvCategory)
-		val row = root.findViewById<View>(R.id.categoryRow)
+		val row = root.findViewById<View>(R.id.categoryValue)
 		val known = categories.toMutableList()
 
 		fun select(cat: Category?) {
@@ -182,6 +180,7 @@ object ActivityBuilder {
 				}
 			}
 			val popup = PopupWindow(column, WRAP_CONTENT, WRAP_CONTENT, true)
+			popup.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
 			fun addRow(text: String, colorId: Int, onEdit: (() -> Unit)? = null, onTap: () -> Unit) {
 				column.addView(LinearLayout(ctx).apply {
@@ -202,7 +201,7 @@ object ActivityBuilder {
 					})
 					if (onEdit != null) {
 						addView(ImageButton(ctx).apply {
-							setImageResource(android.R.drawable.ic_menu_delete)
+							setImageResource(android.R.drawable.ic_menu_edit)
 							background = null
 							imageTintList = ColorStateList.valueOf(Color.WHITE)
 							layoutParams = LinearLayout.LayoutParams(dp(root, 32), dp(root, 32))
@@ -213,7 +212,7 @@ object ActivityBuilder {
 					}
 				})
 			}
-
+			addRow("None", Palette.NONE) { select(null) }
 			known.forEachIndexed { index, c ->
 				addRow(
 					c.name,
@@ -232,35 +231,11 @@ object ActivityBuilder {
 					select(created)
 				}
 			}
-
-			addRow("Category", Palette.NONE) { select(null) }
-			known.forEach { c -> addRow(c.name, c.colorId) { select(c) } }
-			addRow("New category…", Palette.NONE) {
-				onCreateCategory { created ->
-					known.add(created)
-					select(created)
-				}
-			}
-
 			popup.showAsDropDown(anchor, 0, dp(root, 4))
 		}
-
 		return root
 	}
 
 	fun selectedCategoryId(root: View): String = root.getTag(R.id.colorDot) as? String ?: ""
-
-	private fun paint(view: View, colorId: Int, selected: Boolean) {
-		view.background = GradientDrawable().apply {
-			shape = GradientDrawable.OVAL
-			setColor(if (colorId == Palette.NONE) Color.TRANSPARENT else Palette.colorOf(colorId))
-			val d = view.resources.displayMetrics.density
-			setStroke((if (selected) 3 * d else 1 * d).toInt(), Color.WHITE)
-		}
-	}
-
-	fun selectedColorId(root: View): Int = root.getTag(R.id.colorDot) as? Int ?: Palette.NONE
-
-
 }
 

@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.iainnotes.databinding.ActivityAddAlarmBinding
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class AddAlarmActivity : AppCompatActivity() {
@@ -25,12 +24,12 @@ class AddAlarmActivity : AppCompatActivity() {
         val editAlarmId = intent.getStringExtra("editAlarmId")
 
         if (editAlarmId != null) {
+            binding.btnSaveAlarm.isEnabled = false
             lifecycleScope.launch {
                 try {
                     val appData = DataStore.load(this@AddAlarmActivity)
                     existingAlarm = appData.alarms.find { it.id == editAlarmId }
                     existingAlarm?.let { alarm ->
-                        noteId = alarm.noteId
                         binding.header.text = "<edit/${alarm.name}>"
                         binding.etName.setText(alarm.name)
                         binding.timePicker.hour = alarm.timeHour
@@ -47,6 +46,8 @@ class AddAlarmActivity : AppCompatActivity() {
                     }
                 } catch (e: Exception) {
                     handleDataStoreError(e)
+                } finally {
+                    binding.btnSaveAlarm.isEnabled = true
                 }
             }
         } else {
@@ -71,7 +72,16 @@ class AddAlarmActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val data = DataStore.load(this@AddAlarmActivity)
-                val note = data.notes.find { it.id == noteId }
+
+                // Prefer the alarm's own owner; fall back to the intent extra (new-alarm path).
+                // Re-read from `data` rather than trusting the field set by the onCreate coroutine.
+                val editId = intent.getStringExtra("editAlarmId")
+                val existing = editId?.let { id -> data.alarms.find { it.id == id } }
+                val targetNoteId = existing?.noteId?.takeIf { it.isNotEmpty() }
+                    ?: noteId.takeIf { it.isNotEmpty() }
+                    ?: ""
+                android.util.Log.d("ALARM", "noteId='$noteId' existing=${existingAlarm?.id} notes=${data.notes.size}")
+                val note = data.notes.find { it.id == targetNoteId }
                 if (note == null) {
                     Toast.makeText(
                         this@AddAlarmActivity,
@@ -91,21 +101,21 @@ class AddAlarmActivity : AppCompatActivity() {
                     if (binding.btnSun.isChecked) add("SUN")
 
                 }
-
                 val alarm = Alarm(
-                    id = generateId("t"),
-                    noteId = noteId,
+                    id = existing?.id ?: generateId("t"),
+                    noteId = targetNoteId,
                     sectionId = note.sectionId,
                     name = name,
                     timeHour = binding.timePicker.hour,
                     timeMinute = binding.timePicker.minute,
                     displayText = displayText,
-                    isActive = isActive,
-                    repeatDays = repeatDays
+                    isActive = existing?.isActive ?: true,
+                    repeatDays = repeatDays,
+                    createdAt = existing?.createdAt ?: currentTimestamp()
                 )
 
-                if (existingAlarm != null) {
-                    AlarmScheduler.cancel(this@AddAlarmActivity, existingAlarm!!)
+                if (existing != null) {
+                    AlarmScheduler.cancel(this@AddAlarmActivity, existing)  // cancel OLD day-set
                     DataStore.updateAlarm(this@AddAlarmActivity, alarm)
                 } else {
                     DataStore.addAlarm(this@AddAlarmActivity, alarm)

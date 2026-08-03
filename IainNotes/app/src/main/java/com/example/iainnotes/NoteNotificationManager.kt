@@ -9,19 +9,19 @@ import androidx.core.app.NotificationCompat
 
 object NoteNotificationManager {
 
-	const val CHANNEL_ID = "iain_notes_note_channel"
+	const val CHANNEL_ID = "iain_notes_note_channel_v2"   // ← bumped
 	const val ACTION_CANCEL = "com.example.iainnotes.ACTION_CANCEL_NOTE_NOTIFY"
 	const val EXTRA_NOTE_ID = "noteId"
-
 	fun createChannel(context: Context) {
 		val channel = NotificationChannel(
 			CHANNEL_ID,
 			"Note reminders",
-			NotificationManager.IMPORTANCE_HIGH   // ← was IMPORTANCE_LOW
+			NotificationManager.IMPORTANCE_HIGH
 		).apply {
 			description = "Persistent notifications pinned to notes"
 			setShowBadge(true)
 			enableLights(true)
+			setBypassDnd(true)          // ← add
 		}
 		context.getSystemService(NotificationManager::class.java)
 			.createNotificationChannel(channel)
@@ -58,13 +58,22 @@ object NoteNotificationManager {
 			.setSmallIcon(R.drawable.ic_plus)
 			.setContentIntent(openIntent)
 			.setOngoing(true)
-			.setPriority(NotificationCompat.PRIORITY_HIGH)   // ← add this
+			.setPriority(NotificationCompat.PRIORITY_HIGH)
+			.setCategory(NotificationCompat.CATEGORY_ALARM)   // ← add
+			.setOnlyAlertOnce(true)                           // ← add
 			.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 			.addAction(
 				R.drawable.rounded_lock_24,
 				"Dismiss",
 				cancelIntent
 			)
+			.setStyle(
+				NotificationCompat.BigTextStyle()
+					.bigText(note.content.take(500).ifBlank { "Tap to open note" })
+			)
+			.setShowWhen(false)
+			//.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+			//.setCustomBigContentView(remoteViews)
 			.build()
 
 		context.getSystemService(NotificationManager::class.java)
