@@ -1,5 +1,4 @@
 // Use this instead
-import com.android.sdklib.internal.avd.QuickBoot.arguments
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -8,10 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.iainnotes"
+    namespace = "com.liblens.xyznotes"
     compileSdk = 37
     defaultConfig {
-        applicationId = "com.example.iainnotes"
+        applicationId = "com.liblens.xyznotes"
+        buildConfigField("String", "DATA_DIR", "\"xyznotes\"")
         minSdk = 36
         targetSdk = 37
         versionCode = 1
@@ -24,17 +24,16 @@ android {
             }
         }
         ndk { abiFilters += listOf("arm64-v8a") }
-        buildConfigField("String", "DATA_DIR", "\"IainNotes\"")
     }
     buildTypes {
         debug {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            buildConfigField("String", "DATA_DIR", "\"IainNotes-dev\"")
-            resValue("string", "app_name", "IainNotes dev")
+            buildConfigField("String", "DATA_DIR", "\"xyznotes-dev\"")
+            resValue("string", "app_name", "xyznotes dev")
         }
         release {
-            resValue("string", "app_name", "IainNotes")
+            resValue("string", "app_name", "XyzNotes")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

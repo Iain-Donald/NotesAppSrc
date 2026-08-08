@@ -2,7 +2,7 @@
 #include <string.h>
 #include <sodium.h>
 
-#define JNI_FN(name) Java_com_example_iainnotes_crypto_Sodium_##name
+#define JNI_FN(name) Java_com_liblens_xyznotes_crypto_Sodium_##name
 
 JNIEXPORT jint JNICALL JNI_FN(init)(JNIEnv *e, jclass c) {
 (void)e; (void)c;
