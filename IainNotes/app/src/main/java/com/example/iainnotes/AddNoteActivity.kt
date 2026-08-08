@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.iainnotes.databinding.ActivityAddNoteBinding
 
-//import com.example.iainnotes.IdGenerator.makeId
 import kotlinx.coroutines.launch
 
 class AddNoteActivity : AppCompatActivity() {
@@ -64,8 +63,10 @@ class AddNoteActivity : AppCompatActivity() {
                 val existing = editNoteId?.let { id -> data.notes.find { it.id == id } }
 
                 if (editNoteId != null && existing == null) {
-                    Toast.makeText(this@AddNoteActivity,
-                        "Could not find note to edit", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@AddNoteActivity,
+                        "Could not find note to edit", Toast.LENGTH_SHORT
+                    ).show()
                     return@launch
                 }
 
@@ -81,7 +82,9 @@ class AddNoteActivity : AppCompatActivity() {
                 if (existing != null) DataStore.updateNote(this@AddNoteActivity, note)
                 else DataStore.addNote(this@AddNoteActivity, note)
                 finish()
-            } catch (e: Exception) { handleDataStoreError(e) }
+            } catch (e: Exception) {
+                handleDataStoreError(e)
+            }
         }
     }
 }

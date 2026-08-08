@@ -12,7 +12,7 @@ object AlarmStore {
 
 	fun file(): File = File(
 		Environment.getExternalStorageDirectory(),
-		"IainNotes/userData/alarms.json"
+		"${BuildConfig.DATA_DIR}/userData/alarms.json"
 	).also { it.parentFile?.mkdirs() }
 
 	/** Returns empty list on missing file. Throws on corrupt content. */

@@ -17,7 +17,7 @@ object PreferencesManager {
 
     private fun prefsFile() = File(
         Environment.getExternalStorageDirectory(),
-        "IainNotes/user/preferences.json"
+        "${BuildConfig.DATA_DIR}/user/preferences.json"
     ).also { it.parentFile?.mkdirs() }
 
     fun load(): UserPreferences {

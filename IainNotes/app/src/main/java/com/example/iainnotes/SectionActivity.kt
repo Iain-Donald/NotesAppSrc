@@ -74,7 +74,9 @@ class SectionActivity : AppCompatActivity() {
                             try {
                                 val newTitle = input.text.toString().trim()
                                 if (newTitle.isNotEmpty()) {
-                                    val updated = DataStore.renameNote(this@SectionActivity, note.id, newTitle)
+                                    val updated = DataStore.updateNote(
+                                        this@SectionActivity, note.copy(title = newTitle)
+                                    )
                                     cachedAppData = updated
                                     adapter.updateAlarms(updated.alarms)
                                     adapter.submitNotes(

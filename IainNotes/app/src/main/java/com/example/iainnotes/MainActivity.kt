@@ -50,13 +50,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Needed for sections, notes, alarms, and export functionality. Virtually all functionality.
-        if (!Environment.isExternalStorageManager()) {
+        /*if (!Environment.isExternalStorageManager()) {
             startActivity(
                 Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
                     data = "package:$packageName".toUri()
                 }
             )
-        }
+        }*/
 
         if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED) {
