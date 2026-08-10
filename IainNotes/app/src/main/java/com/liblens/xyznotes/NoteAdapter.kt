@@ -16,114 +16,69 @@ class NoteAdapter(
     private val onNotifyToggle: (Note, Boolean) -> Unit,
     private val onRename: (Note) -> Unit,
     private val onDelete: (Note) -> Unit
-) : ListAdapter<NoteAdapter.Item, RecyclerView.ViewHolder>(DiffCallback()) {
+) : ListAdapter<NoteAdapter.Row, NoteAdapter.ViewHolder>(DiffCallback()) {
 
-    sealed class Item {
-        data class Header(val label: String) : Item()
-        data class NoteItem(val note: Note) : Item()
-    }
+    /** Everything the row renders, so DiffUtil sees badge changes. */
+    data class Row(val note: Note, val alarmCount: Int, val anyAlarmActive: Boolean)
 
     private var alarms: List<Alarm> = emptyList()
+    private var notes: List<Note> = emptyList()
 
     fun updateAlarms(newAlarms: List<Alarm>) {
         alarms = newAlarms
-        notifyDataSetChanged()
+        rebuild()
     }
 
-    fun submitNotes(notes: List<Note>) {
-        val items = mutableListOf<Item>()
-        val pinned = notes.filter { it.pinned }
-        val unpinned = notes.filter { !it.pinned }
-        if (pinned.isNotEmpty()) {
-            //items.add(Item.Header("Pins"))
-            items.addAll(pinned.map { Item.NoteItem(it) })
-        }
-        items.addAll(unpinned.map { Item.NoteItem(it) })
-        submitList(items)
+    fun submitNotes(newNotes: List<Note>) {
+        notes = newNotes
+        rebuild()
     }
 
-    override fun getItemViewType(position: Int) = when (getItem(position)) {
-        is Item.Header -> 0
-        is Item.NoteItem -> 1
+    private fun rebuild() {
+        submitList(notes.map { note ->
+            val mine = alarms.filter { it.noteId == note.id }
+            Row(note, mine.size, mine.any { it.isActive })
+        })
     }
 
-    inner class HeaderViewHolder(val binding: ItemNotePinHeaderBinding) :
-        RecyclerView.ViewHolder(binding.root)
-
-    inner class NoteViewHolder(val binding: ItemNoteBinding) :
-        RecyclerView.ViewHolder(binding.root)
+    class ViewHolder(val binding: ItemNoteBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        when (viewType) {
-            0 -> HeaderViewHolder(
-                ItemNotePinHeaderBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                )
-            )
-            else -> NoteViewHolder(
-                ItemNoteBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                )
-            )
-        }
+        ViewHolder(ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (val item = getItem(position)) {
-            is Item.Header -> (holder as HeaderViewHolder).binding.tvPinHeader.text = item.label
-            is Item.NoteItem -> bindNote(holder as NoteViewHolder, item.note)
-        }
-    }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val row = getItem(position)
+        val note = row.note
+        val b = holder.binding
 
-    private fun bindNote(holder: NoteViewHolder, note: Note) {
-        holder.binding.tvNoteTitle.text = note.title
-        holder.binding.tvNotePreview.text = note.content.take(80).ifBlank { "No content" }
+        b.tvNoteTitle.text = note.title
+        b.tvNotePreview.text = note.content.take(80).ifBlank { "No content" }
 
-        if (note.pinned) {
-            holder.binding.btnPin.setImageResource(R.drawable.baseline_push_pin_24)
-            holder.binding.btnPin.imageTintList = androidx.core.content.ContextCompat.getColorStateList(
-                holder.binding.btnPin.context, R.color.icon_accent
-            )
+        b.btnPin.bindPin(note.pinned)
+        b.btnPin.setOnClickListener { onPin(note) }
+
+        if (row.alarmCount == 0) {
+            b.tvAlarmBadge.visibility = View.GONE
         } else {
-            holder.binding.btnPin.setImageResource(R.drawable.outline_push_pin_24)
-            holder.binding.btnPin.imageTintList = androidx.core.content.ContextCompat.getColorStateList(
-                holder.binding.btnPin.context, R.color.buttonL3
+            b.tvAlarmBadge.visibility = View.VISIBLE
+            b.tvAlarmBadge.text = if (row.alarmCount > 9) "9+" else row.alarmCount.toString()
+            (b.tvAlarmBadge.background as? GradientDrawable)?.setColor(
+                if (row.anyAlarmActive) 0xFFFF5252.toInt() else 0xFF888888.toInt()
             )
         }
-        holder.binding.btnPin.setOnClickListener { onPin(note) }
 
-        val noteAlarms = alarms.filter { it.noteId == note.id }
-        if (noteAlarms.isEmpty()) {
-            holder.binding.tvAlarmBadge.visibility = View.GONE
-        } else {
-            holder.binding.tvAlarmBadge.visibility = View.VISIBLE
-            val count = noteAlarms.size
-            holder.binding.tvAlarmBadge.text = if (count > 9) "9+" else count.toString()
-            val anyActive = noteAlarms.any { it.isActive }
-            val badgeColor = if (anyActive) "#FF5252" else "#888888"
-            (holder.binding.tvAlarmBadge.background as? GradientDrawable)
-                ?.setColor(android.graphics.Color.parseColor(badgeColor))
-        }
-
-        holder.binding.btnNotify.setImageResource(
+        b.btnNotify.setImageResource(
             if (note.notifyEnabled) R.drawable.baseline_notifications_24
             else R.drawable.outline_notifications_off_24
         )
-        holder.binding.btnNotify.setOnClickListener { onNotifyToggle(note, !note.notifyEnabled) }
-        holder.binding.btnDeleteNote.setOnClickListener { onDelete(note) }
-        holder.binding.root.setOnClickListener { onTap(note) }
-        holder.binding.root.setOnLongClickListener {
-            //onDelete(note)
-            onRename(note)
-            true
-        }
+        b.btnNotify.setOnClickListener { onNotifyToggle(note, !note.notifyEnabled) }
+        b.btnDeleteNote.setOnClickListener { onDelete(note) }
+        b.root.setOnClickListener { onTap(note) }
+        b.root.setOnLongClickListener { onRename(note); true }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<Item>() {
-        override fun areItemsTheSame(a: Item, b: Item) = when {
-            a is Item.Header && b is Item.Header -> a.label == b.label
-            a is Item.NoteItem && b is Item.NoteItem -> a.note.id == b.note.id
-            else -> false
-        }
-        override fun areContentsTheSame(a: Item, b: Item) = a == b
+    class DiffCallback : DiffUtil.ItemCallback<Row>() {
+        override fun areItemsTheSame(a: Row, b: Row) = a.note.id == b.note.id
+        override fun areContentsTheSame(a: Row, b: Row) = a == b
     }
 }

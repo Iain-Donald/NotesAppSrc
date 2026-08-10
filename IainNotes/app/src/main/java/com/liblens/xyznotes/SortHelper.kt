@@ -2,47 +2,19 @@ package com.liblens.xyznotes
 
 object SortHelper {
 
-	fun sortedSections(
-		sections: List<Section>,
-		sortOrder: String,
-		sortAsc: Boolean
-	): List<Section> {
-		val pinned = applySectionSort(sections.filter { it.pinned }, sortOrder, sortAsc)
-		val unpinned = applySectionSort(sections.filter { !it.pinned }, sortOrder, sortAsc)
-		return pinned + unpinned
-	}
+	/** Pinned items first, each group sorted independently. */
+	fun <T : Sortable> sorted(items: List<T>, sortOrder: String, sortAsc: Boolean): List<T> =
+		apply(items.filter { it.pinned }, sortOrder, sortAsc) +
+				apply(items.filter { !it.pinned }, sortOrder, sortAsc)
 
-	private fun applySectionSort(
-		sections: List<Section>,
-		sortOrder: String,
-		sortAsc: Boolean
-	): List<Section> {
+	private fun <T : Sortable> apply(items: List<T>, sortOrder: String, sortAsc: Boolean): List<T> {
 		val sorted = when (sortOrder) {
-			"alpha" -> sections.sortedBy { it.name.lowercase() }
-			else -> sections.sortedBy { it.createdAt }
+			"alpha" -> items.sortedBy { it.sortName.lowercase() }
+			else -> items.sortedBy { it.sortCreatedAt }
 		}
 		return if (sortAsc) sorted else sorted.reversed()
 	}
 
-	fun sortedNotes(
-		notes: List<Note>,
-		sortOrder: String,
-		sortAsc: Boolean
-	): List<Note> {
-		val pinned = applyNoteSort(notes.filter { it.pinned }, sortOrder, sortAsc)
-		val unpinned = applyNoteSort(notes.filter { !it.pinned }, sortOrder, sortAsc)
-		return pinned + unpinned
-	}
-
-	private fun applyNoteSort(
-		notes: List<Note>,
-		sortOrder: String,
-		sortAsc: Boolean
-	): List<Note> {
-		val sorted = when (sortOrder) {
-			"alpha" -> notes.sortedBy { it.title.lowercase() }
-			else -> notes.sortedBy { it.createdAt }
-		}
-		return if (sortAsc) sorted else sorted.reversed()
-	}
+	fun sortedSections(s: List<Section>, order: String, asc: Boolean) = sorted(s, order, asc)
+	fun sortedNotes(n: List<Note>, order: String, asc: Boolean) = sorted(n, order, asc)
 }

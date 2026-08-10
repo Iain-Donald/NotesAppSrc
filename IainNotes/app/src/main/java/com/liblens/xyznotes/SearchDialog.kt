@@ -35,6 +35,7 @@ object SearchDialog {
 
 		val dialog = Dialog(activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 		dialog.setContentView(b.root)
+		dialog.setCanceledOnTouchOutside(true)
 		dialog.window?.apply {
 			setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
 			setDimAmount(0.7f)
@@ -42,6 +43,8 @@ object SearchDialog {
 			setGravity(Gravity.TOP)
 			setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 		}
+		//b.root.setOnClickListener { dialog.dismiss() }
+		//b.cardSearch.setOnClickListener { }
 
 		// Push the card below the status bar and any display cutout.
 		b.cardSearch.post {
@@ -103,6 +106,7 @@ object SearchDialog {
 		}
 		b.btnCaseSensitive.alpha = 0.5f
 
+		//b.switchIncludeContent.isChecked = true // set in XML instead, more reliable.
 		b.switchIncludeContent.setOnCheckedChangeListener { _, _ -> runSearch() }
 
 		b.etSearchQuery.addTextChangedListener(object : TextWatcher {

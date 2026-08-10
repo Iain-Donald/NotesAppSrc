@@ -3,6 +3,17 @@ package com.liblens.xyznotes
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.io.IOException
+import android.widget.ImageButton
+import androidx.core.content.ContextCompat
+
+fun ImageButton.bindPin(pinned: Boolean) {
+    setImageResource(
+        if (pinned) R.drawable.baseline_push_pin_24 else R.drawable.outline_push_pin_24
+    )
+    imageTintList = ContextCompat.getColorStateList(
+        context, if (pinned) R.color.icon_accent else R.color.buttonL3
+    )
+}
 
 fun AppCompatActivity.handleDataStoreError(e: Exception) {
     val message = when (e) {

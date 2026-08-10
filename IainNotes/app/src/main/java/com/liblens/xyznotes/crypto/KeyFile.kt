@@ -90,7 +90,7 @@ internal object KeyFile {
 		val salt = raw.copyOfRange(20, 20 + Sodium.SALT_BYTES)
 		val nonce = raw.copyOfRange(36, 36 + Sodium.NONCE_BYTES)
 		val wrapped = raw.copyOfRange(60, Format.KEYFILE_LEN)
-		val aad = raw.copyOfRange(0, 36)
+		val aad = raw.copyOfRange(0, 36) // critical for metadata manipulation to weaken argon2, corruption detection, rejects blobs moved from their location as encrypted.
 
 		val kek = deriveKek(passphrase, salt, mKib, t)
 		try {

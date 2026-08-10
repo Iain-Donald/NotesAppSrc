@@ -35,23 +35,21 @@ object SearchHelper {
 			val titleToMatch = if (caseSensitive) note.title else note.title.lowercase()
 			val titleMatches = titleToMatch.contains(normalizedQuery)
 
-			val snippet: String? = if (includeContent && !titleMatches) {
+			var contentMatches = false
+			val snippet: String? = if (includeContent) {
 				val contentToMatch = if (caseSensitive) note.content else note.content.lowercase()
-				val matchIndex = contentToMatch.indexOf(normalizedQuery)
-				if (matchIndex >= 0) extractSnippet(note.content, matchIndex, query.length) else null
-			} else if (includeContent) {
-				// Title matched — still show a snippet if there's content
-				if (note.content.isNotBlank()) extractSnippet(note.content, 0, 0) else null
+				val idx = contentToMatch.indexOf(normalizedQuery)
+				if (idx >= 0) {
+					contentMatches = true
+					extractSnippet(note.content, idx, query.length)
+				} else if (titleMatches && note.content.isNotBlank()) {
+					extractSnippet(note.content, 0, 0)
+				} else null
 			} else null
 
-			val matched = titleMatches || snippet != null
-			if (!matched) return@mapNotNull null
+			if (!titleMatches && !contentMatches) return@mapNotNull null
 
-			SearchResult(
-				note = note,
-				sectionName = sectionNameById[note.sectionId] ?: "",
-				contentSnippet = snippet
-			)
+			SearchResult(note, sectionNameById[note.sectionId] ?: "", snippet)
 		}
 	}
 

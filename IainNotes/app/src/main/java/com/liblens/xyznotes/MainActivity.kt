@@ -1,15 +1,8 @@
 package com.liblens.xyznotes
 
-import android.app.Dialog
 import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.Gravity
-import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -22,15 +15,10 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.liblens.xyznotes.databinding.ActivityMainBinding
-import com.liblens.xyznotes.databinding.DialogSearchBinding
-//import com.example.iainnotes.databinding.ItemDialogalertBinding
 import kotlinx.coroutines.launch
-import androidx.core.graphics.drawable.toDrawable
 
 class MainActivity : AppCompatActivity() {
 
@@ -164,8 +152,7 @@ class MainActivity : AppCompatActivity() {
                         refresh()
                     } catch (e: Exception) { handleDataStoreError(e) }
                 }
-            },
-            onMove = { _, _ -> }
+            }
         )
 
         val sortOptions = listOf("Date created", "Alphabetical")
@@ -298,7 +285,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun refresh() {
         adapter.updateCategories(appData.categories)
-        adapter.submitList(sortedSections())
+        adapter.submitSections(sortedSections())
     }
 
     private fun sortedSections(): List<Section> {
@@ -344,47 +331,6 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
     }
-
-    /*private fun showAddSectionDialog() {
-        val ctx = ContextThemeWrapper(this, R.style.RoundedDialog)
-        val input = EditText(ctx).apply {
-            hint = "Section name"
-            setPadding(48, 24, 48, 24)
-        }
-        AlertDialog.Builder(this, R.style.RoundedDialog)
-            .setTitle("New Section")
-            .setView(input)
-            .setPositiveButton("Add") { _, _ ->
-                lifecycleScope.launch {
-                    var name = input.text.toString().trim()
-                    if (name.isEmpty()) name = "Section"
-                    appData = DataStore.addSection(this@MainActivity, name)
-                    adapter.submitList(sortedSections())
-                    Toast.makeText(this@MainActivity, "Section \"$name\" added", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }*/
-    /*private fun showAddSectionDialog() {
-        val ctx = ContextThemeWrapper(this, R.style.RoundedDialog)
-        val binding = ItemDialogalertBinding.inflate(layoutInflater.cloneInContext(ctx))
-
-        AlertDialog.Builder(this, R.style.RoundedDialog)
-            .setTitle("New Section")
-            .setView(binding.root)
-            .setPositiveButton("Add") { _, _ ->
-                lifecycleScope.launch {
-                    var name = binding.sectionInput.text.toString().trim()
-                    if (name.isEmpty()) name = "Section"
-                    appData = DataStore.addSection(this@MainActivity, name)
-                    adapter.submitList(sortedSections())
-                    Toast.makeText(this@MainActivity, "Section \"$name\" added", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }*/
 
     private fun showAddSectionDialog() {
         val input = ActivityBuilder.input(this)

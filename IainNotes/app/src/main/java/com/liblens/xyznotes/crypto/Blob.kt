@@ -5,6 +5,11 @@ internal object Blob {
 	/** AAD = the blob's logical path. Binds ciphertext to location, so a file
 	 *  surviving a rename cannot be reinterpreted as a different note. */
 	fun seal(plaintext: ByteArray, path: String, dataKey: ByteArray?, encrypted: Boolean): ByteArray {
+		// 192-bit random nonce, fresh per write. No counter is kept: at this size
+		// random selection is collision-free for any realistic number of writes,
+		// which is why a restore-from-backup cannot cause nonce reuse the way a
+		// persisted counter could. Uniqueness is required per-key, and every
+		// install generates its own DK.
 		val header = ByteArray(Format.BLOB_HEADER_LEN)
 		Format.MAGIC.copyInto(header, 0)
 		Format.putU16(header, 4, Format.VERSION)

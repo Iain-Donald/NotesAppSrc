@@ -3,13 +3,18 @@ package com.liblens.xyznotes
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
+interface Sortable {
+    val sortName: String
+    val sortCreatedAt: String
+    val pinned: Boolean
+}
+
 fun currentTimestamp(): String {
     val now = LocalDateTime.now()
     return "%04d%02d%02d-%02d%02d%02d".format(
         now.year, now.monthValue, now.dayOfMonth,
         now.hour, now.minute, now.second
     )
-
 }
 
 //json
@@ -17,15 +22,16 @@ fun currentTimestamp(): String {
 data class Section(
     val id: String = generateId("s"),
     val name: String,
-    val createdAt: String = IdGenerator.decodeId(
-        id.substringAfter("s")
-    ) ?: currentTimestamp(),
+    val createdAt: String = IdGenerator.decodeId(id.substringAfter("s")) ?: currentTimestamp(),
     val modifiedAt: String = createdAt,
-    val sortOrder: String = "date_created",  // "date_created", "alpha", "custom"
+    val sortOrder: String = "date_created",
     val sortAsc: Boolean = true,
-    val pinned: Boolean = false,
+    override val pinned: Boolean = false,          // ← unchanged, no `override` needed
     val categoryId: String = ""
-)
+) : Sortable {
+    override val sortName get() = name
+    override val sortCreatedAt get() = createdAt
+}
 
 @Serializable
 data class Note(
@@ -38,8 +44,11 @@ data class Note(
     ) ?: currentTimestamp(),
     val modifiedAt: String = createdAt,
     val notifyEnabled: Boolean = false,
-    val pinned: Boolean = false
-)
+    override val pinned: Boolean = false
+) : Sortable {
+    override val sortName get() = title
+    override val sortCreatedAt get() = createdAt
+}
 
 @Serializable
 data class Alarm(
