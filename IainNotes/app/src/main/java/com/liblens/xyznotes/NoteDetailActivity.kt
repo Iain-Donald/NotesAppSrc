@@ -1,5 +1,4 @@
 package com.liblens.xyznotes
-// TODO: test
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
@@ -61,12 +60,6 @@ class NoteDetailActivity : AppCompatActivity() {
 
         noteId = intent.getStringExtra("noteId") ?: return
 
-        // Temporary test
-        binding.btnNotify.setOnClickListener {
-            android.util.Log.d("NOTIFY", "btnNotify tapped in onCreate")
-            Toast.makeText(this, "notify tapped", Toast.LENGTH_SHORT).show()
-        }
-
         alarmAdapter = AlarmAdapter(
             onToggle = { alarm, checked ->
                 lifecycleScope.launch {
@@ -84,7 +77,7 @@ class NoteDetailActivity : AppCompatActivity() {
                 )
             },
             onDelete = { alarm ->
-                AlertDialog.Builder(this)
+                ActivityBuilder.dialog(this)
                     .setTitle("Remove \"${alarm.name}\"?")
                     .setPositiveButton("Remove") { _, _ ->
                         lifecycleScope.launch {
@@ -192,12 +185,9 @@ class NoteDetailActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     try {
                         val updated = note.copy(notifyEnabled = !note.notifyEnabled)
-                        android.util.Log.d("NOTIFY", "note.notifyEnabled before: ${note.notifyEnabled}")
-                        android.util.Log.d("NOTIFY", "updated.notifyEnabled: ${updated.notifyEnabled}")
                         //DataStore.updateNote(this@NoteDetailActivity, updated)
                         DataStore.setNoteNotify(this@NoteDetailActivity, noteId, updated.notifyEnabled)
                         val check = DataStore.load(this@NoteDetailActivity)
-                        android.util.Log.d("NOTIFY", "after load notifyEnabled: ${check.notes.find { it.id == noteId }?.notifyEnabled}")
                         if (updated.notifyEnabled) {
                             NoteNotificationManager.notify(this@NoteDetailActivity, updated)
                         } else {

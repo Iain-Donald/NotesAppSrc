@@ -1,26 +1,16 @@
 package com.liblens.xyznotes
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.liblens.xyznotes.databinding.ActivitySectionBinding
-import com.liblens.xyznotes.databinding.DialogSearchBinding
 import kotlinx.coroutines.launch
-import androidx.core.graphics.drawable.toDrawable
 
 class SectionActivity : AppCompatActivity() {
 

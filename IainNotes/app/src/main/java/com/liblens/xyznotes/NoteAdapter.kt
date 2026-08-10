@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.liblens.xyznotes.databinding.ItemNoteBinding
-import com.liblens.xyznotes.databinding.ItemNotePinHeaderBinding
 
 class NoteAdapter(
     private val onTap: (Note) -> Unit,

@@ -19,3 +19,22 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# JNI — method names must survive
+-keepclasseswithmembernames,includedescriptorclasses class com.liblens.xyznotes.crypto.Sodium {
+    native <methods>;
+}
+
+# kotlinx.serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.**
+-keepclassmembers @kotlinx.serialization.Serializable class ** {
+    static <1>$Companion Companion;
+    *** Companion;
+}
+-keepclasseswithmembers class ** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Application subclass referenced by name in the manifest
+-keep class com.liblens.xyznotes.XyzNotesApp

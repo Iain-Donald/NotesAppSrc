@@ -298,7 +298,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showLockDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_lock, null)
-        val dialog = AlertDialog.Builder(this@MainActivity)
+        val dialog = ActivityBuilder.dialog(this@MainActivity)
             .setView(dialogView)
             .setCancelable(false)
             .create()
