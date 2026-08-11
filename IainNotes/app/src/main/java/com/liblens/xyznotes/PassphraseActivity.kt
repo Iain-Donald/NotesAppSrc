@@ -3,12 +3,9 @@ package com.liblens.xyznotes
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.os.Environment
-import android.provider.Settings
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.liblens.xyznotes.crypto.LowMemoryException
 import com.liblens.xyznotes.databinding.ActivityPassphraseBinding
@@ -21,8 +18,8 @@ class PassphraseActivity : AppCompatActivity() {
     private var sessionStarted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeManager.apply()
         super.onCreate(savedInstanceState)
+        ThemeManager.apply()
         binding = ActivityPassphraseBinding.inflate(layoutInflater)
         setContentView(binding.root)
         // Nothing storage-touching here. onResume gates on permission first.
@@ -30,35 +27,9 @@ class PassphraseActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (!Environment.isExternalStorageManager()) {
-            showPermissionGate()
-            return
-        }
         if (!sessionStarted) {
             sessionStarted = true
             beginSession()
-        }
-    }
-
-    // ── Permission gate ───────────────────────────────────────────────────
-
-    private fun showPermissionGate() {
-        binding.header.text = "<storage permission>"
-        binding.tvStatus.visibility = View.VISIBLE
-        binding.tvStatus.text =
-            "IainNotes stores your notes in a folder you can see and back up. " +
-                    "Grant \"All files access\", then return here."
-        binding.etPassphrase.visibility = View.GONE
-        binding.etConfirmPassphrase.visibility = View.GONE
-        binding.tvConfirmLabel.visibility = View.GONE
-        binding.btnConfirm.text = "Open settings"
-        binding.btnConfirm.isEnabled = true
-        binding.btnConfirm.setOnClickListener {
-            startActivity(
-                Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                    data = "package:$packageName".toUri()
-                }
-            )
         }
     }
 
@@ -74,7 +45,6 @@ class PassphraseActivity : AppCompatActivity() {
         }
 
         // Reset anything the permission gate may have hidden.
-        binding.etPassphrase.visibility = View.VISIBLE
         binding.header.text = if (isFirstRun) "<create passphrase>" else "<enter passphrase>"
         binding.btnConfirm.text = if (isFirstRun) "Create" else "Unlock"
         binding.btnConfirm.isEnabled = true

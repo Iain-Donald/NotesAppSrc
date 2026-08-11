@@ -23,6 +23,7 @@ class SectionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ThemeManager.apply()
         binding = ActivitySectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

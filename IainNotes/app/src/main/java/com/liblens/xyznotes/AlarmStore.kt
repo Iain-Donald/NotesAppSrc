@@ -10,10 +10,8 @@ object AlarmStore {
 
 	private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 
-	fun file(): File = File(
-		Environment.getExternalStorageDirectory(),
-		"${BuildConfig.DATA_DIR}/userData/alarms.json"
-	).also { it.parentFile?.mkdirs() }
+	fun file(): File = File(BlobStore.root(), "userData/alarms.json")
+		.also { it.parentFile?.mkdirs() }
 
 	/** Returns empty list on missing file. Throws on corrupt content. */
 	fun load(): List<Alarm> {

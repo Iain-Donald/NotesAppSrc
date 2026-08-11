@@ -8,9 +8,7 @@ import com.liblens.xyznotes.BuildConfig
 /** Marks an in-flight passphrase enable/disable so an interrupted run is recoverable. */
 internal object Transition {
 
-	private fun marker() = File(
-		Environment.getExternalStorageDirectory(), "${BuildConfig.DATA_DIR}/.transition"
-	)
+	private fun marker() = File(BlobStore.root(), ".transition")
 
 	fun begin(targetEncrypted: Boolean) {
 		AtomicFile.write(marker(), (if (targetEncrypted) "encrypt" else "decrypt").toByteArray())

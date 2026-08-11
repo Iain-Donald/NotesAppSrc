@@ -76,7 +76,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.commons.compress) // tar archive support. // Deprecated by project: Remove after migration is complete.
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

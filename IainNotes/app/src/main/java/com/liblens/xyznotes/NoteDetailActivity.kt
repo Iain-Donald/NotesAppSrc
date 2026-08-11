@@ -33,9 +33,8 @@ class NoteDetailActivity : AppCompatActivity() {
     private val diff get() = binding.etNoteContent.text.toString() != String(savedContent)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeManager.apply()
         super.onCreate(savedInstanceState)
-
+        ThemeManager.apply()
         binding = ActivityNoteDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -172,6 +171,13 @@ class NoteDetailActivity : AppCompatActivity() {
             // leave the editor content and savedContent alone so unsaved edits are preserved.
 
             alarmAdapter.submitList(alarms)
+            if (alarms.any { it.isActive } && !AlarmScheduler.canScheduleExact(this@NoteDetailActivity)) {
+                Toast.makeText(
+                    this@NoteDetailActivity,
+                    "Exact reminders are off — alarms may be delayed",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
             updateSaveButton()
 
             // Update icon based on current state

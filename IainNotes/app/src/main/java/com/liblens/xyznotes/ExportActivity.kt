@@ -1,10 +1,12 @@
 package com.liblens.xyznotes
 
-import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.liblens.xyznotes.crypto.CryptoException
 import com.liblens.xyznotes.databinding.ActivityExportBinding
 import kotlinx.coroutines.launch
 
@@ -12,82 +14,68 @@ class ExportActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityExportBinding
     private val prefs by lazy { PreferencesManager.load() }
+    private var pendingEncrypted = false
+
+    private val createDocument = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/x-tar")
+    ) { uri -> if (uri != null) writeTo(uri) else resetButtons() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeManager.apply()
         super.onCreate(savedInstanceState)
-
+        ThemeManager.apply()
         binding = ActivityExportBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         binding.header.text = "<export>"
 
-        // Only show encrypted option if passphrase is set
         if (!prefs.usePassphrase) {
             binding.btnExportEncrypted.visibility = View.GONE
             binding.tvEncryptedDesc.visibility = View.GONE
         }
-
-        binding.btnExportPlain.setOnClickListener {
-            showExportConfirmDialog(encrypted = false)
-        }
-
-        binding.btnExportEncrypted.setOnClickListener {
-            showExportConfirmDialog(encrypted = true)
-        }
+        binding.btnExportPlain.setOnClickListener { confirm(false) }
+        binding.btnExportEncrypted.setOnClickListener { confirm(true) }
     }
 
-    private fun showExportConfirmDialog(encrypted: Boolean) {
-        val title = if (encrypted) "Export encrypted" else "Export decrypted"
+    private fun confirm(encrypted: Boolean) {
         val message = if (encrypted)
-            "Export as XyzNotes-export.tar.enc, will require your passphrase to open."
+            "Saves a .enc.tar containing your encrypted notes and key file. " +
+                    "Your passphrase is required to open it — treat the file as sensitive."
         else
-            "Export as XyzNotes-export.tar, contents readable by anyone with the file."
+            "Saves a plain .tar. Contents are readable by anyone with the file."
 
-        ActivityBuilder.dialog(this@ExportActivity)
-            .setTitle(title)
+        ActivityBuilder.dialog(this)
+            .setTitle(if (encrypted) "Export encrypted" else "Export decrypted")
             .setMessage(message)
-            .setPositiveButton("Export") { _, _ ->
-                performExport(encrypted)
+            .setPositiveButton("Choose location") { _, _ ->
+                pendingEncrypted = encrypted
+                binding.btnExportPlain.isEnabled = false
+                binding.btnExportEncrypted.isEnabled = false
+                createDocument.launch(Exporter.suggestedName(encrypted))
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
-    private fun performExport(encrypted: Boolean) {
+    private fun writeTo(uri: Uri) {
         binding.tvStatus.visibility = View.VISIBLE
-        binding.tvStatus.text = if (encrypted) "Encrypting..." else "Packing..."
-        binding.btnExportPlain.isEnabled = false
-        binding.btnExportEncrypted.isEnabled = false
+        binding.tvStatus.text = if (pendingEncrypted) "Encrypting..." else "Packing..."
 
-        binding.tvStatus.post {
-            lifecycleScope.launch {
-                try {
-                    val file = DataStore.export(encrypted)
-                    binding.tvStatus.text = "Exported to ${file.absolutePath}"
-                    binding.btnExportPlain.isEnabled = true
-                    binding.btnExportEncrypted.isEnabled = true
-
-                    // Offer to share via system share sheet
-                    val uri = androidx.core.content.FileProvider.getUriForFile(
-                        this@ExportActivity,
-                        "${packageName}.provider",
-                        file
-                    )
-                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "application/octet-stream"
-                        putExtra(Intent.EXTRA_STREAM, uri)
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
-                    startActivity(Intent.createChooser(shareIntent, "Share export via"))
-
-                } catch (e: Exception) {
-                    binding.tvStatus.text = "Export failed"
-                    binding.btnExportPlain.isEnabled = true
-                    binding.btnExportEncrypted.isEnabled = true
-                    handleDataStoreError(e)
-                }
+        lifecycleScope.launch {
+            try {
+                contentResolver.openOutputStream(uri)?.use { out ->
+                    DataStore.exportTo(out, pendingEncrypted)
+                } ?: throw CryptoException("Could not open the chosen location for writing")
+                binding.tvStatus.text = "Exported"
+            } catch (e: Exception) {
+                binding.tvStatus.text = "Export failed"
+                handleDataStoreError(e)
+            } finally {
+                resetButtons()
             }
         }
+    }
+
+    private fun resetButtons() {
+        binding.btnExportPlain.isEnabled = true
+        binding.btnExportEncrypted.isEnabled = true
     }
 }

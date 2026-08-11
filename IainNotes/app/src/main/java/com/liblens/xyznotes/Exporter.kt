@@ -1,44 +1,46 @@
 package com.liblens.xyznotes
 
+import com.liblens.xyznotes.crypto.CryptoException
 import com.liblens.xyznotes.crypto.KeyFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
+import java.io.OutputStream
 
 object Exporter {
 
-	/** encryptedExport=true  -> sealed blobs + key file; needs the passphrase to open.
-	 *  encryptedExport=false -> plaintext files, readable in any zip tool. */
-	suspend fun export(
-		dataKey: ByteArray?, storedEncrypted: Boolean, encryptedExport: Boolean
-	): File = withContext(Dispatchers.IO) {
-		val name = if (encryptedExport) "IainNotes-export.enc.zip" else "IainNotes-export.zip"
-		val out = File(BlobStore.root(), name)
-
-		ZipOutputStream(FileOutputStream(out).buffered()).use { zip ->
+	/** Writes the archive to an arbitrary stream, so the caller can hand us a
+	 *  SAF-provided OutputStream for a location the user chose. */
+	suspend fun exportTo(
+		stream: OutputStream,
+		dataKey: ByteArray?,
+		storedEncrypted: Boolean,
+		encryptedExport: Boolean
+	): Unit = withContext(Dispatchers.IO) {
+		require(!encryptedExport || storedEncrypted) {
+			"Cannot export encrypted — no passphrase is set"
+		}
+		TarWriter(stream.buffered()).use { tar ->
 			BlobStore.list().forEach { path ->
 				if (encryptedExport) {
-					// Raw sealed bytes, byte-identical to what's on disk.
-					val f = File(BlobStore.root(), "$path.xyn")
-					zip.putNextEntry(ZipEntry("$path.xyn")); zip.write(f.readBytes()); zip.closeEntry()
+					tar.addFile("$path.xyn", File(BlobStore.root(), "$path.xyn").readBytes())
 				} else {
-					val plain = BlobStore.read(path, dataKey) ?: return@forEach
-					zip.putNextEntry(ZipEntry(path)); zip.write(plain); zip.closeEntry()
+					tar.addFile(path, BlobStore.read(path, dataKey)
+						?: throw CryptoException("Could not read $path for export"))
 				}
 			}
-			AlarmStore.file().takeIf { it.exists() }?.let {
-				zip.putNextEntry(ZipEntry("userData/alarms.json")); zip.write(it.readBytes()); zip.closeEntry()
-			}
+			AlarmStore.file().takeIf { it.exists() }
+				?.let { tar.addFile("userData/alarms.json", it.readBytes()) }
 			if (encryptedExport) {
-				// Self-contained: an export can be restored even if the install is gone.
-				KeyFile.locations().first().takeIf { it.exists() }?.let {
-					zip.putNextEntry(ZipEntry("keys.xync")); zip.write(it.readBytes()); zip.closeEntry()
-				}
+				KeyFile.locations().first().takeIf { it.exists() }
+					?.let { tar.addFile("keys.xync", it.readBytes()) }
 			}
 		}
-		out
+	}
+
+	fun suggestedName(encryptedExport: Boolean): String {
+		val stamp = currentTimestamp()
+		return if (encryptedExport) "XyzNotes-$stamp.enc.tar" else "XyzNotes-$stamp.tar"
 	}
 }

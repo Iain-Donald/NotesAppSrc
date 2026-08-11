@@ -7,6 +7,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import java.io.OutputStream
 
 object DataStore {
     private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
@@ -41,7 +42,7 @@ object DataStore {
 
     fun invalidateCache() { cacheValid = false }
 
-    fun hasContainer() = KeyFile.exists() || Migration.hasLegacyContainer()
+    fun hasContainer() = KeyFile.exists()
 
     fun isUnlocked() = unlocked
 
@@ -50,11 +51,7 @@ object DataStore {
     /** Suspending — Argon2id allocates 64 MiB and blocks. Closes Tier 0 #5. */
     suspend fun unlock(passphrase: CharArray?): Boolean = withContext(Dispatchers.IO) {
         mutex.withLock {
-            if (Migration.hasLegacyContainer() && !KeyFile.exists()) {
-                Migration.migrateV1ToV2(passphrase) ?: return@withLock false
-            }
             Transition.recover(expectedEncrypted = passphrase?.isNotEmpty() == true)
-
             val dk = KeyFile.unwrap(passphrase) ?: return@withLock false
             dataKey = dk
             encrypted = KeyFile.currentKdfId() == Format.KDF_ARGON2ID
@@ -66,13 +63,6 @@ object DataStore {
 
     suspend fun unlockWithoutPassphrase(): Boolean = unlock(null)
 
-    /*suspend fun initEmpty(): Unit = withContext(Dispatchers.IO) { iainnote old v1
-        mutex.withLock {
-            saveMapLocked(MapFile())
-            AlarmStore.save(emptyList())
-        }
-    }*/
-
     fun lock() {
         dataKey?.let { Sodium.memzero(it) }
         dataKey = null
@@ -80,6 +70,9 @@ object DataStore {
         cachedAppData = null
         cacheValid = false
     }
+
+    suspend fun exportTo(stream: OutputStream, encryptedExport: Boolean) =
+        Exporter.exportTo(stream, dataKey, encrypted, encryptedExport)
 
     // ── Passphrase transitions ────────────────────────────────────────────
 
@@ -256,12 +249,6 @@ object DataStore {
         }))
     }
 
-    /*suspend fun renameNote(context: Context, noteId: String, newTitle: String): AppData {
-        val data = load(context)
-        val note = data.notes.find { it.id == noteId } ?: return data
-        return updateNote(context, note.copy(title = newTitle))
-    }*/
-
     suspend fun setNoteNotify(context: Context, noteId: String, enabled: Boolean) = mutate {
         val map = loadMapLocked()
         saveMapLocked(map.copy(notes = map.notes.map {
@@ -364,8 +351,4 @@ object DataStore {
             if (it.id == sectionId) it.copy(categoryId = categoryId, modifiedAt = currentTimestamp()) else it
         }))
     }
-
-    // ── Export ────────────────────────────────────────────────────────────
-
-    suspend fun export(encryptedExport: Boolean) = Exporter.export(dataKey, encrypted, encryptedExport)
 }

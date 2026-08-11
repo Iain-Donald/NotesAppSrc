@@ -15,9 +15,8 @@ class AddNoteActivity : AppCompatActivity() {
     private var existingNote: Note? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeManager.apply()
         super.onCreate(savedInstanceState)
-
+        ThemeManager.apply()
         binding = ActivityAddNoteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

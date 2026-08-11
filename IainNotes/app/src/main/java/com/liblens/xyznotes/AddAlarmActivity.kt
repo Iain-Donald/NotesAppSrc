@@ -1,11 +1,14 @@
 package com.liblens.xyznotes
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.liblens.xyznotes.databinding.ActivityAddAlarmBinding
 import kotlinx.coroutines.launch
+import android.provider.Settings
 
 class AddAlarmActivity : AppCompatActivity() {
 
@@ -14,9 +17,8 @@ class AddAlarmActivity : AppCompatActivity() {
     private var existingAlarm: Alarm? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeManager.apply()
         super.onCreate(savedInstanceState)
-
+        ThemeManager.apply()
         binding = ActivityAddAlarmBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -57,7 +59,24 @@ class AddAlarmActivity : AppCompatActivity() {
         binding.btnSaveAlarm.setOnClickListener { saveAlarm() }
     }
 
-    private fun saveAlarm() {
+    private fun showExactAlarmRationale() {
+        ActivityBuilder.dialog(this)
+            .setTitle("Allow exact reminders?")
+            .setMessage(
+                "Android needs permission to fire reminders at the exact set time. " +
+                        "Without it, reminders may be delayed by while the " +
+                        "device is idle."
+            )
+            .setPositiveButton("Allow") { _, _ ->
+                startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    data = "package:$packageName".toUri()
+                })
+            }
+            .setNegativeButton("Save anyway") { _, _ -> saveAlarm(skipExactCheck = true) }
+            .show()
+    }
+
+    private fun saveAlarm(skipExactCheck: Boolean = false) {
         var name = binding.etName.text.toString().trim()
         var displayText = binding.etDisplayText.text.toString().trim()
 
@@ -114,13 +133,20 @@ class AddAlarmActivity : AppCompatActivity() {
                     createdAt = existing?.createdAt ?: currentTimestamp()
                 )
 
+                // Ask before writing, so "Allow" returns the user to an unsaved
+                // form rather than one they think is already armed exactly.
+                if (!skipExactCheck && alarm.isActive
+                    && !AlarmScheduler.canScheduleExact(this@AddAlarmActivity)) {
+                    showExactAlarmRationale()
+                    return@launch
+                }
+
                 if (existing != null) {
-                    AlarmScheduler.cancel(this@AddAlarmActivity, existing)  // cancel OLD day-set
+                    AlarmScheduler.cancel(this@AddAlarmActivity, existing)
                     DataStore.updateAlarm(this@AddAlarmActivity, alarm)
                 } else {
                     DataStore.addAlarm(this@AddAlarmActivity, alarm)
                 }
-
                 if (alarm.isActive) AlarmScheduler.schedule(this@AddAlarmActivity, alarm)
                 finish()
             } catch (e: Exception) {

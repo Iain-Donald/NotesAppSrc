@@ -1,5 +1,6 @@
 package com.liblens.xyznotes
 
+import android.content.Context
 import android.os.Environment
 import com.liblens.xyznotes.crypto.AtomicFile
 import com.liblens.xyznotes.crypto.Blob
@@ -11,10 +12,18 @@ import java.io.File
 object BlobStore {
 
 	private const val EXT = ".xyn"
+	private var appContext: Context? = null
+	/** Called once from XyzNotesApp.onCreate, before any Activity exists. */
+	fun init(context: Context) { appContext = context.applicationContext }
 
-	//fun root(): File = File(Environment.getExternalStorageDirectory(), "IainNotes")
-	fun root(): File = File(Environment.getExternalStorageDirectory(), BuildConfig.DATA_DIR)
-
+	/** /sdcard/Android/data/<appId>/files/  — no permission required.
+	 *  Removed on uninstall; that is why exports go through SAF to a
+	 *  user-chosen location the app does not control. */
+	fun root(): File {
+		val ctx = appContext
+			?: error("BlobStore.init() must be called from XyzNotesApp.onCreate before any storage access")
+		return File(ctx.getExternalFilesDir(null), BuildConfig.DATA_DIR).also { it.mkdirs() }
+	}
 
 	/** Logical path -> on-disk file. Filename discipline is load-bearing:
 	 *  ids stay recoverable from filenames for recoverFromDisk(). */

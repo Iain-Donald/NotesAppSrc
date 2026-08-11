@@ -9,16 +9,16 @@ import java.io.File
 data class UserPreferences(
     val usePassphrase: Boolean = false,
     val lockOnClose: Boolean = false,
-    val theme: String = "dark"   // "light", "dark", "amoled"
+    val theme: String = "dark",
+    val dndPromptDismissed: Boolean = false,
+    val notifPromptShown: Boolean = false
 )
 
 object PreferencesManager {
     private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 
-    private fun prefsFile() = File(
-        Environment.getExternalStorageDirectory(),
-        "${BuildConfig.DATA_DIR}/user/preferences.json"
-    ).also { it.parentFile?.mkdirs() }
+    private fun prefsFile() = File(BlobStore.root(), "user/preferences.json")
+        .also { it.parentFile?.mkdirs() }
 
     fun load(): UserPreferences {
         val f = prefsFile()

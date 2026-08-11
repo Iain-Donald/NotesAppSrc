@@ -1,6 +1,7 @@
 package com.liblens.xyznotes.crypto
 
 import android.os.Environment
+import com.liblens.xyznotes.BlobStore
 import java.io.File
 import com.liblens.xyznotes.BuildConfig
 
@@ -8,20 +9,11 @@ internal object KeyFile {
 
 	/** Three copies. Losing all of them means losing the data key permanently,
 	 *  so redundancy here is disproportionately valuable — 108 bytes each. */
-	fun locations(): List<File> {
-		/*val root = Environment.getExternalStorageDirectory()
-		return listOf(
-			File(root, "IainNotes/keys.xync"),
-			File(root, "IainNotes/keys.xync.bak"),
-			File(root, "IainNotes/userData/.keys.xync")
-		)*/
-		val root = Environment.getExternalStorageDirectory()
-		return listOf(
-			File(root, "${BuildConfig.DATA_DIR}/keys.xync"),
-			File(root, "${BuildConfig.DATA_DIR}/keys.xync.bak"),
-			File(root, "${BuildConfig.DATA_DIR}/userData/.keys.xync")
-		)
-	}
+	fun locations(): List<File> = listOf(
+		File(BlobStore.root(), "keys.xync"),
+		File(BlobStore.root(), "keys.xync.bak"),
+		File(BlobStore.root(), "userData/.keys.xync")
+	)
 
 	fun exists(): Boolean = locations().any { it.exists() }
 

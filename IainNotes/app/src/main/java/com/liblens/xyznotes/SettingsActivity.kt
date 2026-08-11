@@ -1,7 +1,10 @@
 package com.liblens.xyznotes
 
+import android.app.NotificationManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -9,6 +12,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.liblens.xyznotes.databinding.ActivitySettingsBinding
 import kotlinx.coroutines.launch
@@ -18,8 +23,11 @@ class SettingsActivity : AppCompatActivity() {
     private var prefs = PreferencesManager.load()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeManager.apply()
         super.onCreate(savedInstanceState)
+        android.util.Log.i("XYNC", "theme pref=${PreferencesManager.load().theme} " +
+                "mode=${AppCompatDelegate.getDefaultNightMode()} " +
+                "(NO=${AppCompatDelegate.MODE_NIGHT_NO}, YES=${AppCompatDelegate.MODE_NIGHT_YES})")
+        ThemeManager.apply()
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -66,8 +74,44 @@ class SettingsActivity : AppCompatActivity() {
             else -> R.id.radioDark
         })
 
+        bindPermissions()
+
         // Now enable the listener for user interaction
         listeningToRadio = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshPermissionStates()
+    }
+
+    private fun bindPermissions() {
+        val nm = getSystemService(NotificationManager::class.java)
+
+        binding.rowExactAlarms.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                data = "package:$packageName".toUri()
+            })
+        }
+        binding.rowDnd.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+        }
+        binding.rowNotifications.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+            })
+        }
+    }
+
+    private fun refreshPermissionStates() {
+        val nm = getSystemService(NotificationManager::class.java)
+        binding.tvExactAlarmsState.text =
+            if (AlarmScheduler.canScheduleExact(this)) "Granted" else "Not granted"
+        binding.tvDndState.text =
+            if (nm.isNotificationPolicyAccessGranted) "Granted" else "Not granted"
+        binding.tvNotificationsState.text =
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) "Granted" else "Not granted"
     }
 
     private fun loadPrefs() {
@@ -82,7 +126,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun showSetPassphraseDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_set_passphrase, null)
-        val dialog = AlertDialog.Builder(this)
+        val dialog = ActivityBuilder.dialog(this)
             .setView(dialogView)
             .setCancelable(false)
             .create()

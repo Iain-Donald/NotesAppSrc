@@ -5,6 +5,10 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.liblens.xyznotes.databinding.ActivityAlarmAlertBinding
 
@@ -14,11 +18,15 @@ class AlarmAlertActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeManager.apply()
         super.onCreate(savedInstanceState)
-
+        ThemeManager.apply()
         binding = ActivityAlarmAlertBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+        )
 
         val alarmName = intent.getStringExtra("alarmName") ?: "Alarm"
         val displayText = intent.getStringExtra("displayText") ?: ""
@@ -59,30 +67,61 @@ class AlarmAlertActivity : AppCompatActivity() {
         }
     }
 
+    private var vibrator: Vibrator? = null
+
+    private fun startVibration() {
+        val vm = getSystemService(VibratorManager::class.java) ?: return
+        vibrator = vm.defaultVibrator
+        val pattern = longArrayOf(0, 500, 500)
+        vibrator?.vibrate(
+            VibrationEffect.createWaveform(pattern, 0),   // 0 = repeat from index 0
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .build()
+        )
+    }
+    private var timeoutHandler: android.os.Handler? = null
+
     private fun startAlarmSound() {
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(applicationContext, alarmUri)
-            setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            )
-            isLooping = true
-            prepare()
-            start()
+            ?: return
+        try {
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(applicationContext, alarmUri)
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+                isLooping = true
+                prepare()
+                start()
+            }
+        } catch (e: Exception) {
+            // A missing or unplayable ringtone must not kill the alert.
+            android.util.Log.w("XYNC", "alarm sound failed", e)
+        }
+        startVibration()
+
+        // Auto-dismiss so an unattended alarm doesn't drain the battery.
+        timeoutHandler = android.os.Handler(mainLooper).also {
+            it.postDelayed({ stopAlarmSound(); finish() }, 5 * 60 * 1000L)
         }
     }
 
     private fun stopAlarmSound() {
-        mediaPlayer?.apply { if (isPlaying) stop(); release() }
+        timeoutHandler?.removeCallbacksAndMessages(null)
+        timeoutHandler = null
+        try { mediaPlayer?.apply { if (isPlaying) stop(); release() } } catch (_: Exception) { }
         mediaPlayer = null
+        vibrator?.cancel()
+        vibrator = null
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        stopAlarmSound()
+        if (isFinishing) stopAlarmSound()
     }
 }

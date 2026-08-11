@@ -9,17 +9,21 @@ import android.icu.util.Calendar
 
 object AlarmScheduler {
 
-    private fun canScheduleExact(context: Context): Boolean {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        return alarmManager.canScheduleExactAlarms()
+    fun canScheduleExact(context: Context): Boolean =
+        (context.getSystemService(Context.ALARM_SERVICE) as AlarmManager).canScheduleExactAlarms()
+
+    /** Exact when permitted, inexact otherwise. An alarm that fires late beats
+     *  one that never fires, so a missing permission degrades rather than refuses. */
+    @SuppressLint("ScheduleExactAlarm")
+    private fun armExact(am: AlarmManager, triggerAt: Long, pi: PendingIntent, exact: Boolean) {
+        if (exact) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
+        else am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
     }
 
-    @SuppressLint("ScheduleExactAlarm")
-    fun schedule(context: Context, alarm: Alarm) {
-        if (!alarm.isActive) return
-        if (!canScheduleExact(context)) return   // silently skip if no permission
-
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    fun schedule(context: Context, alarm: Alarm): Boolean {
+        if (!alarm.isActive) return true
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val exact = canScheduleExact(context)
 
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("alarmId", alarm.id)
@@ -42,11 +46,7 @@ object AlarmScheduler {
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntent
-            )
+            armExact(am, calendar.timeInMillis, pendingIntent, exact)
         } else {
             // Repeating — schedule one PendingIntent per selected day
             alarm.repeatDays.forEach { day ->
@@ -74,13 +74,10 @@ object AlarmScheduler {
                     intent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    pendingIntent
-                )
+                armExact(am, calendar.timeInMillis, pendingIntent, exact)
             }
         }
+        return true
     }
 
     fun cancel(context: Context, alarm: Alarm) {
@@ -111,8 +108,8 @@ object AlarmScheduler {
     /** Schedules a single firing at an exact epoch time, ignoring repeatDays.
      *  Used for snooze, where hour/minute alone loses the date. */
     @SuppressLint("ScheduleExactAlarm")
-    fun scheduleAt(context: Context, alarm: Alarm, triggerAtMillis: Long) {
-        if (!canScheduleExact(context)) return
+    fun scheduleAt(context: Context, alarm: Alarm, triggerAtMillis: Long): Boolean {
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("alarmId", alarm.id)
@@ -129,5 +126,7 @@ object AlarmScheduler {
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent
         )
+        armExact(am, triggerAtMillis, pendingIntent, canScheduleExact(context))
+        return canScheduleExact(context)
     }
 }

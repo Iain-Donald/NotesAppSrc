@@ -3,6 +3,7 @@ package com.liblens.xyznotes
 import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -15,6 +16,8 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.liblens.xyznotes.databinding.ActivityMainBinding
@@ -30,10 +33,15 @@ class MainActivity : AppCompatActivity() {
     private var spinnerReady = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeManager.apply()
         super.onCreate(savedInstanceState)
+        ThemeManager.apply()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        android.util.Log.i("XYNC", "bg=" +
+                Integer.toHexString(androidx.core.content.ContextCompat.getColor(this, R.color.appBackground)) +
+                " surface=" + Integer.toHexString(androidx.core.content.ContextCompat.getColor(this, R.color.appSurface)) +
+                " mode=" + androidx.appcompat.app.AppCompatDelegate.getDefaultNightMode() +
+                " uiMode=" + (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK))
 
         // Needed for sections, notes, alarms, and export functionality. Virtually all functionality.
         /*if (!Environment.isExternalStorageManager()) {
@@ -221,26 +229,41 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        binding.root.post {
+            val fromRes = ContextCompat.getColor(this, R.color.appBackground)
+            val fromWin = (window.decorView.background as? android.graphics.drawable.ColorDrawable)?.color
+            android.util.Log.i("XYNC", "RESUME res=${Integer.toHexString(fromRes)}" +
+                    " window=${fromWin?.let { Integer.toHexString(it) }}" +
+                    " mode=${AppCompatDelegate.getDefaultNightMode()}" +
+                    " uiMode=${resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK}")
+        }
         NoteNotificationManager.createChannel(this)
 
+        var prefs = PreferencesManager.load()
+
+        if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED && !prefs.notifPromptShown) {
+            prefs = prefs.copy(notifPromptShown = true)
+            PreferencesManager.save(prefs)
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1002)
+        }
+
         val nm = getSystemService(NotificationManager::class.java)
-        if (!nm.isNotificationPolicyAccessGranted) {
+        if (!nm.isNotificationPolicyAccessGranted && !prefs.dndPromptDismissed) {
             ActivityBuilder.dialog(this)
                 .setTitle("Allow reminders during Do Not Disturb?")
                 .setMessage("Note reminders will be silenced by Do Not Disturb unless you grant this.")
                 .setPositiveButton("Open Settings") { _, _ ->
                     startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
                 }
-                .setNegativeButton("Not now", null)
+                .setNegativeButton("Not now") { _, _ ->
+                    // Asked once. The setting stays reachable in Settings.
+                    PreferencesManager.save(
+                        PreferencesManager.load().copy(dndPromptDismissed = true)
+                    )
+                }
                 .show()
         }
-
-        if (intent.getBooleanExtra("lock_and_close", false)) {
-            finish()
-            return
-        }
-
-        val prefs = PreferencesManager.load()
         binding.btnLock.visibility =
             if (prefs.usePassphrase) View.VISIBLE else View.GONE
 
@@ -259,7 +282,7 @@ class MainActivity : AppCompatActivity() {
                 spinnerReady = false
                 binding.spinnerSortSections.setSelection(when (currentSortOrder) {
                     "alpha" -> 1
-                    "custom" -> 2
+                    /*"custom" -> 2*/
                     else -> 0
                 }, false)
                 binding.btnSortDirSections.setImageResource(
@@ -276,8 +299,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        val prefs = PreferencesManager.load()
-        if (prefs.lockOnClose) {
+        // isFinishing excludes configuration changes and Activity recreation —
+        // a theme switch or rotation must not be treated as closing the app.
+        if (!isFinishing || isChangingConfigurations) return
+        if (PreferencesManager.load().lockOnClose) {
             DataStore.lock()
             LockNotificationService.stop(this)
         }
