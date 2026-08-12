@@ -1,23 +1,16 @@
 package com.liblens.xyznotes
 
-import androidx.appcompat.app.AppCompatDelegate
-
 object ThemeManager {
 
+    /** Loads the stored preference into Palette. Deliberately does NOT touch
+     *  AppCompatDelegate: no resource-qualifier switching, no Activity
+     *  recreation, no config churn. Colors are applied per-view instead. */
     fun apply() {
-        val theme = PreferencesManager.load().theme
-        android.util.Log.i("XYNC", "apply() theme=$theme from ${Thread.currentThread().stackTrace[3]}")
-        val mode = when (theme) {
-            "light" -> AppCompatDelegate.MODE_NIGHT_NO
-            "dark", "amoled" -> AppCompatDelegate.MODE_NIGHT_YES
-            else -> AppCompatDelegate.MODE_NIGHT_YES
-        }
-        AppCompatDelegate.setDefaultNightMode(mode)
+        Palette.setDark(PreferencesManager.load().theme != "light")
     }
 
     fun switch(theme: String) {
-        val prefs = PreferencesManager.load()
-        PreferencesManager.save(prefs.copy(theme = theme))
-        apply()
+        PreferencesManager.save(PreferencesManager.load().copy(theme = theme))
+        Palette.setDark(theme != "light")
     }
 }

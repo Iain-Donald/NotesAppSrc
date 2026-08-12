@@ -37,20 +37,7 @@ class MainActivity : AppCompatActivity() {
         ThemeManager.apply()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        android.util.Log.i("XYNC", "bg=" +
-                Integer.toHexString(androidx.core.content.ContextCompat.getColor(this, R.color.appBackground)) +
-                " surface=" + Integer.toHexString(androidx.core.content.ContextCompat.getColor(this, R.color.appSurface)) +
-                " mode=" + androidx.appcompat.app.AppCompatDelegate.getDefaultNightMode() +
-                " uiMode=" + (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK))
-
-        // Needed for sections, notes, alarms, and export functionality. Virtually all functionality.
-        /*if (!Environment.isExternalStorageManager()) {
-            startActivity(
-                Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                    data = "package:$packageName".toUri()
-                }
-            )
-        }*/
+        applySkin()
 
         if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED) {
@@ -311,6 +298,24 @@ class MainActivity : AppCompatActivity() {
     private fun refresh() {
         adapter.updateCategories(appData.categories)
         adapter.submitSections(sortedSections())
+    }
+
+    private fun applySkin() {
+        binding.root.setBackgroundColor(Palette.background)
+        binding.header.setTextColor(Palette.textPrimary)
+
+        binding.fabAddSection.backgroundTintList = Palette.tint(Palette.button)
+        binding.fabAddSection.imageTintList = Palette.tint(Palette.buttonText)
+
+        listOf(binding.btnSearch, binding.btnSettings, binding.btnSortDirSections)
+            .forEach { it.imageTintList = Palette.tint(Palette.icon) }
+
+        binding.btnLock.imageTintList = Palette.tint(Palette.icon)
+
+        binding.fabAddSection.backgroundTintList = Palette.tint(Palette.button)
+        binding.fabAddSection.imageTintList = Palette.tint(Palette.buttonText)
+
+        binding.spinnerSortSections.backgroundTintList = Palette.tint(Palette.icon)
     }
 
     private fun sortedSections(): List<Section> {

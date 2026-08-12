@@ -22,6 +22,7 @@ class AlarmAlertActivity : AppCompatActivity() {
         ThemeManager.apply()
         binding = ActivityAlarmAlertBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySkin()
         window.addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
             WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
@@ -64,6 +65,17 @@ class AlarmAlertActivity : AppCompatActivity() {
                 snoozeAt
             )
             finish()
+        }
+    }
+
+    private fun applySkin() {
+        binding.root.setBackgroundColor(Palette.background)
+        binding.tvTime.setTextColor(Palette.textPrimary)
+        binding.tvAlarmName.setTextColor(Palette.textPrimary)
+        binding.tvDisplayText.setTextColor(Palette.textDim)
+        listOf(binding.btnSnooze, binding.btnDismiss).forEach {
+            it.backgroundTintList = Palette.tint(Palette.button)
+            it.setTextColor(Palette.buttonText)
         }
     }
 

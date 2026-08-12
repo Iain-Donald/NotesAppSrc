@@ -52,6 +52,17 @@ class SectionAdapter(
             b.colorBar.setBackgroundColor(Palette.colorOf(row.colorId))
         }
 
+        b.tvSectionName.setTextColor(Palette.textPrimary)
+        b.root.setBackgroundColor(Palette.surface)
+        b.btnDeleteSection.imageTintList = Palette.tint(Palette.iconDim)
+        b.btnPin.imageTintList = Palette.tint(
+            if (section.pinned) Palette.accent else Palette.iconDim
+        )
+
+        b.root.setBackgroundColor(Palette.surface)
+        b.tvSectionName.setTextColor(Palette.textPrimary)
+        b.btnDeleteSection.imageTintList = Palette.tint(Palette.iconDim)
+
         b.btnPin.bindPin(section.pinned)
         b.btnPin.setOnClickListener { onPin(section) }
     }

@@ -21,6 +21,7 @@ class AddAlarmActivity : AppCompatActivity() {
         ThemeManager.apply()
         binding = ActivityAddAlarmBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySkin()
 
         noteId = intent.getStringExtra("noteId") ?: ""
         val editAlarmId = intent.getStringExtra("editAlarmId")
@@ -57,6 +58,26 @@ class AddAlarmActivity : AppCompatActivity() {
         }
 
         binding.btnSaveAlarm.setOnClickListener { saveAlarm() }
+    }
+
+    private fun applySkin() {
+        binding.root.setBackgroundColor(Palette.background)
+        binding.header.setTextColor(Palette.textPrimary)
+
+        listOf(binding.etName, binding.etDisplayText).forEach {
+            it.setTextColor(Palette.textPrimary)
+            it.setHintTextColor(Palette.textHint)
+            it.backgroundTintList = Palette.tint(Palette.border)
+        }
+
+        listOf(binding.btnMon, binding.btnTue, binding.btnWed, binding.btnThu,
+            binding.btnFri, binding.btnSat, binding.btnSun).forEach {
+            it.setTextColor(Palette.textPrimary)
+            it.backgroundTintList = Palette.tint(Palette.surface)
+        }
+
+        binding.btnSaveAlarm.backgroundTintList = Palette.tint(Palette.button)
+        binding.btnSaveAlarm.imageTintList = Palette.tint(Palette.buttonText)
     }
 
     private fun showExactAlarmRationale() {

@@ -138,57 +138,18 @@
 
     </LinearLayout>
 
-    <!--TextView
-        android:id="@+id/labelActive"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Active"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"
-        android:paddingLeft="16dp"
-        app:layout_constraintTop_toBottomOf="@id/layoutDays"
-        app:layout_constraintStart_toStartOf="parent" /-->
-
-    <!--Switch
-        android:id="@+id/switchActive"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checked="true"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="12dp"
-        app:layout_constraintTop_toBottomOf="@id/layoutDays"
-        app:layout_constraintStart_toEndOf="@id/labelActive" /-->
-
-    <!--<CheckBox
-        android:id="@+id/switchActive"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checked="true"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="12dp"
-        app:layout_constraintTop_toBottomOf="@id/layoutDays"
-        app:layout_constraintStart_toEndOf="@id/labelActive"/>-->
-
-    <!--Button
+    <ImageButton
         android:id="@+id/btnSaveAlarm"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Save Alarm"
-        android:layout_marginTop="24dp"
-        app:backgroundTint="@color/exp5"
-        app:layout_constraintTop_toBottomOf="@id/switchActive"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" /-->
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnSaveAlarm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_margin="16dp"
-        android:contentDescription="Save note"
+        android:contentDescription="Save alarm"
         android:src="@drawable/outline_save_24"
-        app:backgroundTint="@color/sylf"
-        app:tint="@color/white"
+        android:background="@drawable/fab_circle"
+        android:scaleType="centerInside"
+        android:elevation="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

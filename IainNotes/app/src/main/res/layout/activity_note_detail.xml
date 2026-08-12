@@ -4,8 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="@color/appSurface">
+    android:fitsSystemWindows="true">
 
     <!-- Notify toggle — left of header -->
     <ImageButton
@@ -13,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/outline_notifications_off_24"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@null"
         android:contentDescription="Toggle notification"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
@@ -54,7 +53,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/outline_edit_square_24"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@null"
         android:contentDescription="Edit note title"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
@@ -98,72 +97,25 @@
 
     </LinearLayout>
 
-    <!--linear layout or whatever div eq goes here to wrap the button and the text label for it and change the click listener to listen for a click on the button AND on the div area.-->
-
-    <!--TextView
-        android:id="@+id/btnToggleAlarmsLabel"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:textSize="16sp"
-        android:text="Note alarms"
-        android:padding="8dp"
-        android:fontFamily="@font/inter"
-        android:textColor="@color/textL2_5"
-        app:layout_constraintTop_toTopOf="@id/btnToggleAlarms"
-        app:layout_constraintBottom_toBottomOf="@id/btnToggleAlarms"
-        app:layout_constraintEnd_toStartOf="@id/btnToggleAlarms" /-->
-    <!-- Toggle alarm panel — circular FAB style -->
-    <!--com.google.android.material.floatingactionbutton.FloatingActionButton-->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <ImageButton
         android:id="@+id/btnToggleAlarms"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="4dp"
         android:src="@drawable/outline_alarm_24"
         android:contentDescription="Toggle alarms"
-        app:backgroundTint="@color/exp5"
-        app:tint="@color/white"
-        app:fabSize="mini"
+        android:background="@drawable/fab_circle"
         app:layout_constraintTop_toBottomOf="@id/layoutAlarmSection"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!--com.google.android.material.button.MaterialButton
-        android:id="@+id/btnToggleAlarmsLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Note alarms"
-        android:textSize="16sp"
-        android:fontFamily="@font/inter"
-        android:textColor="@color/textL2_5"
-        android:minHeight="0dp"
-        android:minWidth="0dp"
-        app:backgroundTint="@android:color/transparent"
-        app:rippleColor="?attr/colorControlHighlight"
-        app:strokeWidth="2dp"
-        app:layout_constraintTop_toTopOf="@id/btnToggleAlarms"
-        app:layout_constraintBottom_toBottomOf="@id/btnToggleAlarms"
-        app:layout_constraintEnd_toStartOf="@id/btnToggleAlarms"/-->
-
-    <!--View
-        android:id="@+id/divider"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="4dp"
-        android:background="@color/borderBlend"
-        app:layout_constraintTop_toBottomOf="@id/btnToggleAlarms"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" /-->
-
-    <com.google.android.material.divider.MaterialDivider
+    <View
         android:id="@+id/divider"
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:layout_marginTop="4dp"
         android:padding="0dp"
         android:layout_marginRight="0dp"
-        android:background="@color/borderBlend"
         app:layout_constraintTop_toBottomOf="@id/btnToggleAlarms"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -182,22 +134,21 @@
         android:textSize="13.5sp"
         android:fontFamily="@font/interreg"
         android:textColor="@color/notetext"
-        android:background="@color/appBackground"
         app:layout_constraintTop_toBottomOf="@id/divider"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <ImageButton
         android:id="@+id/btnSaveNote"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_margin="16dp"
         android:contentDescription="Save note"
         android:src="@drawable/outline_save_24"
-        app:backgroundTint="@color/sylf"
-        app:tint="@color/white"
+        android:background="@drawable/fab_circle"
+        android:scaleType="centerInside"
+        android:elevation="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

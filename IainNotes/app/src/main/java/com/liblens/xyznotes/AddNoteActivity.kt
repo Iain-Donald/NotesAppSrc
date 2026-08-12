@@ -19,6 +19,7 @@ class AddNoteActivity : AppCompatActivity() {
         ThemeManager.apply()
         binding = ActivityAddNoteBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySkin()
 
         sectionId = intent.getStringExtra("sectionId") ?: ""
         val sectionName = intent.getStringExtra("sectionName") ?: ""
@@ -46,6 +47,22 @@ class AddNoteActivity : AppCompatActivity() {
         }
 
         binding.btnSaveNote.setOnClickListener { saveNote() }
+    }
+
+    private fun applySkin() {
+        binding.root.setBackgroundColor(Palette.background)
+        binding.header.setTextColor(Palette.textPrimary)
+        binding.divider.setBackgroundColor(Palette.divider)
+
+        binding.etNoteTitle.setTextColor(Palette.textPrimary)
+        binding.etNoteTitle.setHintTextColor(Palette.textHint)
+        binding.etNoteContent.setTextColor(Palette.textBody)
+        binding.etNoteContent.setHintTextColor(Palette.textHint)
+
+        binding.etNoteContent.setBackgroundColor(Palette.input)
+
+        binding.btnSaveNote.backgroundTintList = Palette.tint(Palette.button)
+        binding.btnSaveNote.imageTintList = Palette.tint(Palette.buttonText)
     }
 
     private fun saveNote() {

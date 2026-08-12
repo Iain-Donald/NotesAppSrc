@@ -4,7 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/appBackground"
     android:textColor="@color/appTextPrimary"
     android:fitsSystemWindows="true">
 
@@ -14,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/rounded_lock_24"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@null"
         android:contentDescription="Lock"
         android:padding="12dp"
         android:visibility="gone"
@@ -44,7 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/outline_search_24"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@null"
         android:contentDescription="Search"
         android:padding="8dp"
         app:tint="@color/buttonL2"
@@ -58,7 +57,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/twotune"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@null"
         android:contentDescription="Settings"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
@@ -86,7 +85,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/outline_arrow_upward_24"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@null"
         android:contentDescription="Sort direction"
         android:padding="8dp"
         app:tint="@color/buttonL2"
@@ -111,15 +110,16 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Add section button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <ImageButton
         android:id="@+id/fabAddSection"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_margin="16dp"
         android:contentDescription="Add Section"
         android:src="@drawable/ic_plus"
-        app:backgroundTint="@color/sylf"
-        app:tint="@color/white"
+        android:background="@drawable/fab_circle"
+        android:scaleType="centerInside"
+        android:elevation="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

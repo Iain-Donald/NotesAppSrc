@@ -8,6 +8,7 @@ import android.os.PowerManager
 class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        BlobStore.init(context)
         val alarmId = intent.getStringExtra("alarmId") ?: return
         val isSnooze = intent.getBooleanExtra("isSnooze", false)
 

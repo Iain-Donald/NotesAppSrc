@@ -25,6 +25,7 @@ class ExportActivity : AppCompatActivity() {
         ThemeManager.apply()
         binding = ActivityExportBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySkin()
         binding.header.text = "<export>"
 
         if (!prefs.usePassphrase) {
@@ -33,6 +34,19 @@ class ExportActivity : AppCompatActivity() {
         }
         binding.btnExportPlain.setOnClickListener { confirm(false) }
         binding.btnExportEncrypted.setOnClickListener { confirm(true) }
+    }
+
+    private fun applySkin() {
+        binding.root.setBackgroundColor(Palette.background)
+        binding.header.setTextColor(Palette.textPrimary)
+        listOf(binding.tvPlainDesc, binding.tvEncryptedDesc)
+            .forEach { it.setTextColor(Palette.textDim) }
+        binding.tvStatus.setTextColor(Palette.textDim)
+        binding.divider.setBackgroundColor(Palette.divider)
+        listOf(binding.btnExportPlain, binding.btnExportEncrypted).forEach {
+            it.backgroundTintList = Palette.tint(Palette.button)
+            it.setTextColor(Palette.buttonText)
+        }
     }
 
     private fun confirm(encrypted: Boolean) {

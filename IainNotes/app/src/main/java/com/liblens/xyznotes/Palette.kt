@@ -1,6 +1,13 @@
 package com.liblens.xyznotes
 
+import android.content.res.ColorStateList
+
 object Palette {
+
+	// ══ Category colors ═══════════════════════════════════════════════════
+	// Theme-independent by necessity: colorId is persisted in map.json, so a
+	// given id must render the same color forever, in any theme.
+
 	const val NONE = 0
 
 	// Index in this array == colorId - 1. Append only; never reorder or
@@ -18,4 +25,48 @@ object Palette {
 
 	fun colorOf(id: Int): Int =
 		if (id in 1..colors.size) colors[id - 1] else 0
+
+
+	// ══ Skin ══════════════════════════════════════════════════════════════
+	// Every themed color in the app, resolved here and applied programmatically.
+	// No theme attributes, no resource qualifiers, no tint compositing:
+	// what is set from here is what renders.
+
+	var dark: Boolean = true
+		private set
+
+	fun setDark(value: Boolean) { dark = value }
+
+	private fun pick(darkValue: Long, lightValue: Long): Int =
+		(if (dark) darkValue else lightValue).toInt()
+
+	// ── Surfaces ──────────────────────────────────────────────────────
+	val background get() = pick(0xFF000000, 0xFFEAEAE5)
+	val surface get() = pick(0xFF141519, 0xFFFFFFFF)   // was 0xFF404040 / 0xFFDDDDDD
+	val input      get() = pick(0xFF551188, 0xFFE0E0DA)
+	val divider    get() = pick(0xFFFFB300, 0xFFDDDDDD)
+
+	// ── Text ──────────────────────────────────────────────────────────
+	val textPrimary   get() = pick(0xFFFAFAFA, 0xFF111111)
+	val textSecondary get() = pick(0xFFFFB300, 0xFF555550)
+	val textHint      get() = pick(0xFFFAFAFA, 0xFF999990)
+	val textBody      get() = pick(0xFFDDDDDD, 0xFF1A1A1A)
+	val textDim       get() = pick(0xFFCCCCCC, 0xFF555555)
+
+	// ── Icons / controls ──────────────────────────────────────────────
+	val icon       get() = pick(0xFFEEEEEE, 0xFF333333)
+	val iconDim    get() = pick(0xFFAAAAAA, 0xFF888888)
+	val accent     get() = pick(0xFFFFB300, 0xFFCC8F00)
+	val border     get() = pick(0xFFEEEEEE, 0xFFCCCCCC)
+
+	// ── Buttons ───────────────────────────────────────────────────────
+	val button     get() = pick(0xFFEC727B, 0xFFC94F5A)
+	val buttonText get() = pick(0xFF111111, 0xFFFFFFFF)
+
+	// ── Badges ────────────────────────────────────────────────────────
+	// Identical in both themes; kept here so nothing reaches into colors.xml.
+	val badgeActive   = 0xFFFF5252.toInt()
+	val badgeInactive = 0xFF888888.toInt()
+
+	fun tint(color: Int): ColorStateList = ColorStateList.valueOf(color)
 }

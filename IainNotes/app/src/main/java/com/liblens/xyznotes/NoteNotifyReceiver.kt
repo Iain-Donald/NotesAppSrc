@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 class NoteNotifyReceiver : BroadcastReceiver() {
 	@OptIn(DelicateCoroutinesApi::class)
 	override fun onReceive(context: Context, intent: Intent) {
+		BlobStore.init(context)
 		if (intent.action != NoteNotificationManager.ACTION_CANCEL) return
 		val noteId = intent.getStringExtra(NoteNotificationManager.EXTRA_NOTE_ID) ?: return
 

@@ -26,6 +26,7 @@ class SectionActivity : AppCompatActivity() {
         ThemeManager.apply()
         binding = ActivitySectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySkin()
 
         sectionId = intent.getStringExtra("sectionId") ?: ""
         sectionName = intent.getStringExtra("sectionName") ?: ""
@@ -202,6 +203,19 @@ class SectionActivity : AppCompatActivity() {
                 refreshList(data)
             } catch (e: Exception) { handleDataStoreError(e) }
         }
+    }
+
+    private fun applySkin() {
+        binding.root.setBackgroundColor(Palette.background)
+        binding.header.setTextColor(Palette.textPrimary)
+
+        listOf(binding.btnSearch, binding.btnSettings, binding.btnSortDir)
+            .forEach { it.imageTintList = Palette.tint(Palette.icon) }
+
+        binding.spinnerSort.backgroundTintList = Palette.tint(Palette.icon)
+
+        binding.fabAddAlarm.backgroundTintList = Palette.tint(Palette.button)
+        binding.fabAddAlarm.imageTintList = Palette.tint(Palette.buttonText)
     }
 
     private fun refreshList(data: AppData) {

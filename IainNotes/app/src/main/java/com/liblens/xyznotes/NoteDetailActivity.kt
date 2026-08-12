@@ -37,6 +37,8 @@ class NoteDetailActivity : AppCompatActivity() {
         ThemeManager.apply()
         binding = ActivityNoteDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySkin()
+        android.util.Log.i("XYNC", "detail skin applied, textPrimary=${Integer.toHexString(Palette.textPrimary)}")
 
         // Alarm panel starts hidden
         var alarmPanelVisible = false
@@ -136,6 +138,28 @@ class NoteDetailActivity : AppCompatActivity() {
         loadNote()
     }
 
+    private fun applySkin() {
+        binding.root.setBackgroundColor(Palette.background)
+        binding.header.setTextColor(Palette.textPrimary)
+        binding.divider.setBackgroundColor(Palette.divider)
+
+        binding.etNoteContent.setTextColor(Palette.textBody)
+        binding.etNoteContent.setHintTextColor(Palette.textHint)
+
+        binding.btnEditNote.imageTintList = Palette.tint(Palette.icon)
+        // btnNotify is state-dependent; loadNote() sets its tint.
+
+        binding.btnAddAlarm.backgroundTintList = Palette.tint(Palette.button)
+        binding.btnAddAlarm.setTextColor(Palette.buttonText)
+
+        binding.etNoteContent.setBackgroundColor(Palette.input)
+
+        listOf(binding.btnToggleAlarms, binding.btnSaveNote).forEach {
+            it.backgroundTintList = Palette.tint(Palette.button)
+            it.imageTintList = Palette.tint(Palette.buttonText)
+        }
+    }
+
     private fun loadNote() {
         lifecycleScope.launch {
             val data = DataStore.load(this@NoteDetailActivity)
@@ -151,13 +175,6 @@ class NoteDetailActivity : AppCompatActivity() {
             binding.header.setTextColor(
                 ContextCompat.getColor(this@NoteDetailActivity, R.color.buttonL1)
             )
-            //binding.header.setTextColor(android.graphics.Color.parseColor("#22ffff"))
-
-            /*binding.header.text = run {
-                val sectionName = data.sections.find { it.id == note.sectionId }?.name
-                if (sectionName != null) "Sections > $sectionName > ${note.title}"
-                else "Sections > ${note.title}"
-            }*/
 
             //binding.header.colo
 
@@ -181,9 +198,8 @@ class NoteDetailActivity : AppCompatActivity() {
             updateSaveButton()
 
             // Update icon based on current state
-            binding.btnNotify.setImageResource(
-                if (note.notifyEnabled) R.drawable.baseline_notifications_24
-                else R.drawable.outline_notifications_off_24
+            binding.btnNotify.imageTintList = Palette.tint(
+                if (note.notifyEnabled) Palette.accent else Palette.iconDim
             )
 
             // Re-set listener with fresh note reference each load
@@ -228,8 +244,8 @@ class NoteDetailActivity : AppCompatActivity() {
         val hasChanges = diff
         binding.btnSaveNote.isEnabled = hasChanges
         if (hasChanges) {
-            binding.btnSaveNote.backgroundTintList = ColorStateList.valueOf(
-                getColor(com.google.android.material.R.color.design_default_color_primary))
+            binding.btnSaveNote.backgroundTintList = Palette.tint(Palette.button)
+            binding.btnSaveNote.imageTintList = Palette.tint(Palette.buttonText)
             binding.btnSaveNote.visibility = View.VISIBLE
         } else {
             binding.btnSaveNote.visibility = View.GONE

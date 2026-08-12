@@ -37,6 +37,19 @@ class AlarmAdapter(
             onToggle(alarm, checked)
         }
 
+        val b = holder.binding
+        b.root.setBackgroundColor(Palette.surface)
+        b.tvAlarmTime.setTextColor(Palette.textPrimary)
+        b.tvAlarmName.setTextColor(Palette.textPrimary)
+        b.tvAlarmRepeat.setTextColor(Palette.textDim)
+        b.tvAlarmActive.setTextColor(
+            if (alarm.isActive) Palette.accent else Palette.iconDim
+        )
+        b.btnEditAlarm.imageTintList = Palette.tint(Palette.icon)
+        b.btnDeleteAlarm.imageTintList = Palette.tint(Palette.iconDim)
+        b.switchAlarmActive.thumbTintList = Palette.tint(Palette.accent)
+        b.switchAlarmActive.trackTintList = Palette.tint(Palette.iconDim)
+
         holder.binding.btnEditAlarm.setOnClickListener { onEdit(alarm) }
         holder.binding.btnDeleteAlarm.setOnClickListener { onDelete(alarm) }
     }

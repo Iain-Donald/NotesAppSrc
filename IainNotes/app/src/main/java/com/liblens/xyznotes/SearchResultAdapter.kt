@@ -36,6 +36,13 @@ class SearchResultAdapter(
 		} else {
 			holder.binding.tvResultSnippet.visibility = View.GONE
 		}
+
+		val b = holder.binding
+		b.root.setBackgroundColor(Palette.surface)
+		b.tvResultSection.setTextColor(Palette.textDim)
+		b.tvResultTitle.setTextColor(Palette.textPrimary)
+		b.tvResultSnippet.setTextColor(Palette.textBody)
+
 		holder.binding.root.setOnClickListener { onTap(result) }
 	}
 

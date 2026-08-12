@@ -70,6 +70,15 @@ class NoteAdapter(
             if (note.notifyEnabled) R.drawable.baseline_notifications_24
             else R.drawable.outline_notifications_off_24
         )
+
+        b.root.setBackgroundColor(Palette.surface)
+        b.tvNoteTitle.setTextColor(Palette.textPrimary)
+        b.tvNotePreview.setTextColor(Palette.textDim)
+        b.btnDeleteNote.imageTintList = Palette.tint(Palette.iconDim)
+        b.btnNotify.imageTintList = Palette.tint(
+            if (note.notifyEnabled) Palette.accent else Palette.iconDim
+        )
+
         b.btnNotify.setOnClickListener { onNotifyToggle(note, !note.notifyEnabled) }
         b.btnDeleteNote.setOnClickListener { onDelete(note) }
         b.root.setOnClickListener { onTap(note) }

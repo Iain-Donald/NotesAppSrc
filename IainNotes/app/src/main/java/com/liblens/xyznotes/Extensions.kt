@@ -10,9 +10,7 @@ fun ImageButton.bindPin(pinned: Boolean) {
     setImageResource(
         if (pinned) R.drawable.baseline_push_pin_24 else R.drawable.outline_push_pin_24
     )
-    imageTintList = ContextCompat.getColorStateList(
-        context, if (pinned) R.color.icon_accent else R.color.buttonL3
-    )
+    imageTintList = Palette.tint(if (pinned) Palette.accent else Palette.iconDim)
 }
 
 fun AppCompatActivity.handleDataStoreError(e: Exception) {

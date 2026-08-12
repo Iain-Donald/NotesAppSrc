@@ -18,10 +18,12 @@ class PassphraseActivity : AppCompatActivity() {
     private var sessionStarted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        BlobStore.init(this)
         super.onCreate(savedInstanceState)
         ThemeManager.apply()
         binding = ActivityPassphraseBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySkin()
         // Nothing storage-touching here. onResume gates on permission first.
     }
 
@@ -29,8 +31,25 @@ class PassphraseActivity : AppCompatActivity() {
         super.onResume()
         if (!sessionStarted) {
             sessionStarted = true
+            applySkin()
             beginSession()
         }
+    }
+
+    private fun applySkin() {
+        binding.root.setBackgroundColor(Palette.background)
+        binding.header.setTextColor(Palette.textPrimary)
+        binding.tvConfirmLabel.setTextColor(Palette.textPrimary)
+        binding.tvStatus.setTextColor(Palette.textDim)
+
+        listOf(binding.etPassphrase, binding.etConfirmPassphrase).forEach {
+            it.setTextColor(Palette.textPrimary)
+            it.setHintTextColor(Palette.textHint)
+            it.backgroundTintList = Palette.tint(Palette.border)
+        }
+
+        binding.btnConfirm.backgroundTintList = Palette.tint(Palette.button)
+        binding.btnConfirm.setTextColor(Palette.buttonText)
     }
 
     // ── Session ───────────────────────────────────────────────────────────

@@ -24,12 +24,10 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        android.util.Log.i("XYNC", "theme pref=${PreferencesManager.load().theme} " +
-                "mode=${AppCompatDelegate.getDefaultNightMode()} " +
-                "(NO=${AppCompatDelegate.MODE_NIGHT_NO}, YES=${AppCompatDelegate.MODE_NIGHT_YES})")
         ThemeManager.apply()
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySkin()
 
         binding.header.text = "<settings>"
         prefs = PreferencesManager.load()
@@ -65,6 +63,7 @@ class SettingsActivity : AppCompatActivity() {
                 else -> "dark"
             }
             ThemeManager.switch(theme)
+            recreate()
         }
 
         // Set the current selection — flag is false so listener ignores this
@@ -83,6 +82,40 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refreshPermissionStates()
+    }
+
+    private fun applySkin() {
+        binding.root.setBackgroundColor(Palette.background)
+        binding.header.setTextColor(Palette.textPrimary)
+
+        listOf(
+            binding.tvPassphraseLabel, binding.tvLockOnCloseLabel,
+            binding.tvThemeLabel, binding.tvPermissionsLabel, binding.aboutLabel,
+            binding.rowExactAlarms, binding.rowDnd, binding.rowNotifications
+        ).forEach { it.setTextColor(Palette.textPrimary) }
+
+        listOf(
+            binding.tvExactAlarmsState, binding.tvDndState, binding.tvNotificationsState
+        ).forEach { it.setTextColor(Palette.textDim) }
+
+        listOf(binding.btnChangePassphrase, binding.btnExport).forEach {
+            it.backgroundTintList = Palette.tint(Palette.button)
+            it.setTextColor(Palette.buttonText)
+        }
+
+        listOf(binding.divider3, binding.divider4, binding.divider5).forEach {
+            it.setBackgroundColor(Palette.divider)
+        }
+
+        listOf(binding.radioLight, binding.radioDark).forEach {
+            it.setTextColor(Palette.textPrimary)
+            it.buttonTintList = Palette.tint(Palette.accent)
+        }
+
+        listOf(binding.switchUsePassphrase, binding.switchLockOnClose).forEach {
+            it.thumbTintList = Palette.tint(Palette.accent)
+            it.trackTintList = Palette.tint(Palette.iconDim)
+        }
     }
 
     private fun bindPermissions() {

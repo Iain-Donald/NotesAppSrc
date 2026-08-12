@@ -14,14 +14,15 @@ object BlobStore {
 	private const val EXT = ".xyn"
 	private var appContext: Context? = null
 	/** Called once from XyzNotesApp.onCreate, before any Activity exists. */
-	fun init(context: Context) { appContext = context.applicationContext }
+	fun init(context: Context) {
+		if (appContext == null) appContext = context.applicationContext
+	}
 
 	/** /sdcard/Android/data/<appId>/files/  — no permission required.
 	 *  Removed on uninstall; that is why exports go through SAF to a
 	 *  user-chosen location the app does not control. */
 	fun root(): File {
-		val ctx = appContext
-			?: error("BlobStore.init() must be called from XyzNotesApp.onCreate before any storage access")
+		val ctx = appContext ?: error("BlobStore.init() must be called before storage access")
 		return File(ctx.getExternalFilesDir(null), BuildConfig.DATA_DIR).also { it.mkdirs() }
 	}
 
