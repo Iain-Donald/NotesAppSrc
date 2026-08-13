@@ -17,7 +17,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.liblens.xyznotes.databinding.ActivityMainBinding
@@ -99,9 +98,9 @@ class MainActivity : AppCompatActivity() {
                 val input = view.findViewById<EditText>(R.id.sectionInput)
 
                 ActivityBuilder.dialog(this)
-                    .setTitle("Rename Section")
+                    .setTitle("Edit section")
                     .setView(view)
-                    .setPositiveButton("Rename") { _, _ ->
+                    .setPositiveButton("Done") { _, _ ->
                         lifecycleScope.launch {
                             val newName = input.text.toString().trim()
                             val newCat = ActivityBuilder.selectedCategoryId(view)
@@ -210,20 +209,13 @@ class MainActivity : AppCompatActivity() {
 
         binding.rvSections.layoutManager = LinearLayoutManager(this)
         binding.rvSections.adapter = adapter
-
+        //applySkin()
         binding.fabAddSection.setOnClickListener { showAddSectionDialog() }
     }
 
     override fun onResume() {
         super.onResume()
-        binding.root.post {
-            val fromRes = ContextCompat.getColor(this, R.color.appBackground)
-            val fromWin = (window.decorView.background as? android.graphics.drawable.ColorDrawable)?.color
-            android.util.Log.i("XYNC", "RESUME res=${Integer.toHexString(fromRes)}" +
-                    " window=${fromWin?.let { Integer.toHexString(it) }}" +
-                    " mode=${AppCompatDelegate.getDefaultNightMode()}" +
-                    " uiMode=${resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK}")
-        }
+        applySkin()
         NoteNotificationManager.createChannel(this)
 
         var prefs = PreferencesManager.load()
@@ -316,6 +308,7 @@ class MainActivity : AppCompatActivity() {
         binding.fabAddSection.imageTintList = Palette.tint(Palette.buttonText)
 
         binding.spinnerSortSections.backgroundTintList = Palette.tint(Palette.icon)
+        if(::adapter.isInitialized)adapter.notifyDataSetChanged()
     }
 
     private fun sortedSections(): List<Section> {

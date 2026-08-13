@@ -59,9 +59,9 @@ class SectionActivity : AppCompatActivity() {
             onRename = { note ->
                 val input = ActivityBuilder.input(this, note.title)
                 ActivityBuilder.dialog(this)
-                    .setTitle("Rename Note")
+                    .setTitle("Rename note")
                     .setView(input)
-                    .setPositiveButton("Rename") { _, _ ->
+                    .setPositiveButton("Done") { _, _ ->
                         lifecycleScope.launch {
                             try {
                                 val newTitle = input.text.toString().trim()
@@ -196,6 +196,7 @@ class SectionActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        applySkin()
         lifecycleScope.launch {
             try {
                 val data = DataStore.load(this@SectionActivity)
@@ -216,6 +217,7 @@ class SectionActivity : AppCompatActivity() {
 
         binding.fabAddAlarm.backgroundTintList = Palette.tint(Palette.button)
         binding.fabAddAlarm.imageTintList = Palette.tint(Palette.buttonText)
+        if(::adapter.isInitialized) adapter.notifyDataSetChanged()
     }
 
     private fun refreshList(data: AppData) {

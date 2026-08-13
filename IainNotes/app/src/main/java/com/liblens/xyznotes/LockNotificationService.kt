@@ -15,7 +15,7 @@ class LockNotificationService : Service() {
     companion object {
         const val CHANNEL_ID = "iain_notes_lock_channel"
         const val NOTIFICATION_ID = 1001
-        const val ACTION_DISMISS = "com.example.iainnotes.ACTION_DISMISS_LOCK"
+        const val ACTION_DISMISS = "com.liblens.xyznotes.ACTION_DISMISS_LOCK"
 
         fun start(context: Context) {
             val intent = Intent(context, LockNotificationService::class.java)

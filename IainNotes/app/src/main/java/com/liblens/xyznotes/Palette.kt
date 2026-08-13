@@ -43,7 +43,7 @@ object Palette {
 	// ── Surfaces ──────────────────────────────────────────────────────
 	val background get() = pick(0xFF000000, 0xFFEAEAE5)
 	val surface get() = pick(0xFF141519, 0xFFFFFFFF)   // was 0xFF404040 / 0xFFDDDDDD
-	val input      get() = pick(0xFF551188, 0xFFE0E0DA)
+	val input      get() = pick(0xFF1E2027, 0xFFE0E0DA)
 	val divider    get() = pick(0xFFFFB300, 0xFFDDDDDD)
 
 	// ── Text ──────────────────────────────────────────────────────────

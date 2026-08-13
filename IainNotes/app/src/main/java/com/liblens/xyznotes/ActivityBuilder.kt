@@ -40,7 +40,7 @@ object ActivityBuilder {
 		view.background = GradientDrawable().apply {
 			shape = GradientDrawable.OVAL
 			setColor(if (colorId == Palette.NONE) Color.TRANSPARENT else Palette.colorOf(colorId))
-			setStroke(((if (selected) 3 else 1) * d).toInt(), Color.WHITE)
+			setStroke(((if (selected) 3 else 1) * d).toInt(), Palette.border)
 		}
 	}
 
@@ -105,7 +105,7 @@ object ActivityBuilder {
 				addView(ImageButton(ctx).apply {
 					setImageResource(android.R.drawable.ic_menu_delete)
 					background = null
-					imageTintList = ColorStateList.valueOf(Color.WHITE)
+					imageTintList = Palette.tint(Palette.iconDim)
 					layoutParams = LinearLayout.LayoutParams((40 * d).toInt(), (40 * d).toInt())
 					setOnClickListener { confirmDeleteCategory(activity, existing, onDelete) }
 				})
@@ -176,7 +176,7 @@ object ActivityBuilder {
 				setPadding(dp(root, 8), dp(root, 8), dp(root, 8), dp(root, 8))
 				background = GradientDrawable().apply {
 					cornerRadius = 12 * ctx.resources.displayMetrics.density
-					setColor(Color.DKGRAY)
+					setColor(Palette.surface)
 				}
 			}
 			val popup = PopupWindow(column, WRAP_CONTENT, WRAP_CONTENT, true)
@@ -194,7 +194,7 @@ object ActivityBuilder {
 					addView(TextView(ctx).apply {
 						this.text = text
 						textSize = 16f
-						setTextColor(Color.WHITE)
+						setTextColor(Palette.textPrimary)
 						setPadding(dp(root, 12), 0, dp(root, 12), 0)
 						layoutParams = LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f)
 						setOnClickListener { onTap(); popup.dismiss() }
@@ -203,7 +203,7 @@ object ActivityBuilder {
 						addView(ImageButton(ctx).apply {
 							setImageResource(android.R.drawable.ic_menu_edit)
 							background = null
-							imageTintList = ColorStateList.valueOf(Color.WHITE)
+							imageTintList = Palette.tint(Palette.iconDim)
 							layoutParams = LinearLayout.LayoutParams(dp(root, 32), dp(root, 32))
 							setOnClickListener { popup.dismiss(); onEdit() }
 						})

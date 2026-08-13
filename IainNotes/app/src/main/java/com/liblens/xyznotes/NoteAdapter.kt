@@ -71,7 +71,7 @@ class NoteAdapter(
             else R.drawable.outline_notifications_off_24
         )
 
-        b.root.setBackgroundColor(Palette.surface)
+        b.root.setBackgroundColor(Palette.background)
         b.tvNoteTitle.setTextColor(Palette.textPrimary)
         b.tvNotePreview.setTextColor(Palette.textDim)
         b.btnDeleteNote.imageTintList = Palette.tint(Palette.iconDim)

@@ -135,6 +135,7 @@ class NoteDetailActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        applySkin()
         loadNote()
     }
 
@@ -158,6 +159,7 @@ class NoteDetailActivity : AppCompatActivity() {
             it.backgroundTintList = Palette.tint(Palette.button)
             it.imageTintList = Palette.tint(Palette.buttonText)
         }
+        if(::alarmAdapter.isInitialized) alarmAdapter.notifyDataSetChanged()
     }
 
     private fun loadNote() {
@@ -171,12 +173,6 @@ class NoteDetailActivity : AppCompatActivity() {
                 if (sectionName != null) "Sections > $sectionName > ${note.title}"
                 else "Sections > ${note.title}"
             }
-
-            binding.header.setTextColor(
-                ContextCompat.getColor(this@NoteDetailActivity, R.color.buttonL1)
-            )
-
-            //binding.header.colo
 
             if (!noteLoaded) {
                 // First load — populate the editor and set the baseline for diff tracking.

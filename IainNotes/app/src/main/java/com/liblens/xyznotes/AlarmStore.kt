@@ -2,7 +2,9 @@ package com.liblens.xyznotes
 
 import android.os.Environment
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.SerializationException
 import java.io.File
+import java.io.IOException
 
 /** Single source of truth for alarms.json. Lives OUTSIDE the encrypted container
  *  so BootReceiver/AlarmReceiver can read it while the app is locked. */
@@ -18,14 +20,11 @@ object AlarmStore {
 		val f = file()
 		if (!f.exists()) return emptyList()
 		return try {
-			val text = f.readText()
-			if (text.trimStart().startsWith("[")) {
-				json.decodeFromString<List<Alarm>>(text).also { save(it) }
-			} else {
-				json.decodeFromString<AlarmsFile>(text).alarms
-			}
-		} catch (e: Exception) {
-			throw DataStoreException("alarms.json is corrupt or unreadable: ${e.message}", e)
+			json.decodeFromString<AlarmsFile>(f.readText()).alarms
+		} catch (e: SerializationException) {
+			throw DataStoreException("alarms.json is corrupt: ${e.message}", e)
+		} catch (e: IOException) {
+			throw DataStoreException("alarms.json is unreadable: ${e.message}", e)
 		}
 	}
 

@@ -1,25 +1,81 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="AndroidLintAccessibilityFocus" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AndroidLintAccessibilityScrollActions" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AndroidLintAccessibilityWindowStateChangedEvent" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AndroidLintClickableViewAccessibility" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AndroidLintContentDescription" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AndroidLintGetContentDescriptionOverride" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="AndroidLintKeyboardInaccessibleWidget" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AndroidLintLabelFor" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="AndroidLintNoOp" enabled="true" level="WEAK WARNING" enabled_by_default="false" editorAttributes="INFO_ATTRIBUTES">
       <scope name="Project Files" level="WEAK WARNING" enabled="true" editorAttributes="INFO_ATTRIBUTES" />
     </inspection_tool>
+    <inspection_tool class="AndroidLintSlices" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AndroidRoomQuestionMarkBindParameter" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="AndroidRoomSqlBooleanLiteral" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AndroidUnresolvedRoomSqlReference" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="ClangTidy" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ConsumerRulesInspection" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="ErrorRethrown" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ExceptionFromCatchWhichDoesntWrap" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreGetMessage" value="false" />
       <option name="ignoreCantWrap" value="false" />
     </inspection_tool>
+    <inspection_tool class="ExpensiveKeepRuleInspection" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="FeatureRequiresHigherWFFVersion" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="GradleKotlinxCoroutinesDeprecation" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="WARNING_ATTRIBUTES" />
+    <inspection_tool class="JUnit3StyleTestMethodInJUnit4Class" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="JUnit5AssertionsConverter" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="JUnitMalformedDeclaration" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="JUnitMixedFramework" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="Junit4Converter" enabled="false" level="INFORMATION" enabled_by_default="false" />
+    <inspection_tool class="Junit4RunWithInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="KotlinBigDecimalEquals" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="NestedTryStatement" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="NewExceptionWithoutArguments" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="NonFinalFieldOfException" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="NullThrown" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="OCUnusedClass" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="OCUnusedIncludeDirective" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="OCUnusedInstanceVariable" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="OCUnusedMethod" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="OCUnusedProperty" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="R8IgnoredFlags" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpDuplicateAlternationBranch" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpDuplicateCharacterInClass" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpEmptyAlternationBranch" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpEscapedMetaCharacter" enabled="false" level="INFORMATION" enabled_by_default="false" />
+    <inspection_tool class="RegExpOctalEscape" enabled="false" level="INFORMATION" enabled_by_default="false" />
+    <inspection_tool class="RegExpRedundantClassElement" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpRedundantEscape" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpRedundantNestedCharacterClass" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpRepeatedSpace" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpSimplifiable" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpSingleCharAlternation" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpSuspiciousBackref" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpUnexpectedAnchor" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="RegExpUnnecessaryNonCapturingGroup" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ReplacePrintlnWithLogging" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="ShrinkerArrayType" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="ShrinkerInnerClassSeparator" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="ShrinkerInvalidFlags" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="ShrinkerUnresolvedReference" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="ThrowCaughtLocally" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreRethrownExceptions" value="false" />
     </inspection_tool>
     <inspection_tool class="TooBroadCatch" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="TooBroadThrows" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="UnnecessaryBlockStatement" enabled="false" level="INFORMATION" enabled_by_default="false">
+      <option name="ignoreSwitchBranches" value="false" />
+    </inspection_tool>
+    <inspection_tool class="WearTilePreviewComposableAnnotationIsNotSupported" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="WearTilePreviewContextComesFromParameter" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="WearTilePreviewDeviceSpec" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="WearTilePreviewHasValidMethodSignature" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="WearTilePreviewMethodIsAnnotatedWithTilePreviewAnnotation" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="WearTilePreviewNotSupportedInUnitTestFiles" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="WearTilePreviewShouldBeTopLevelFunction" enabled="false" level="ERROR" enabled_by_default="false" />
   </profile>
 </component>
