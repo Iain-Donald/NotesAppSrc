@@ -1,6 +1,6 @@
 package com.liblens.xyznotes
 
-import android.os.Environment
+import com.liblens.xyznotes.crypto.AtomicFile
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.SerializationException
 import java.io.File
@@ -29,10 +29,19 @@ object AlarmStore {
 	}
 
 	/** Never throws — receivers have no UI to report on. */
-	fun loadOrEmpty(): List<Alarm> = try { load() } catch (_: Exception) { emptyList() }
+	fun loadOrEmpty(): List<Alarm> = try { load() } catch (e: Exception) {
+		Fail.warn("alarms.json unreadable; treating as empty", e)
+		emptyList()
+	}
 
+	/** tmp -> fsync -> atomic rename. AlarmReceiver writes here while the
+	 *  device may be dozing and may be killed mid-write; load() throws on
+	 *  corrupt content, so a torn write would take out every alarm at once. */
 	fun save(alarms: List<Alarm>) {
-		file().writeText(json.encodeToString(AlarmsFile(alarms = alarms)))
+		AtomicFile.write(
+			file(),
+			json.encodeToString(AlarmsFile(alarms = alarms)).toByteArray(Charsets.UTF_8)
+		)
 		DataStore.invalidateCache()
 	}
 }

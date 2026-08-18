@@ -81,6 +81,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (SessionGate.gate(this)) return
         refreshPermissionStates()
     }
 

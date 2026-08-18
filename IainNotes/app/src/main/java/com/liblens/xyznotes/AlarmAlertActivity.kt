@@ -11,6 +11,7 @@ import android.os.VibratorManager
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.liblens.xyznotes.databinding.ActivityAlarmAlertBinding
+import android.content.Intent
 
 class AlarmAlertActivity : AppCompatActivity() {
 

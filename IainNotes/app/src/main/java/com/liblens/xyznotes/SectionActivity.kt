@@ -196,6 +196,7 @@ class SectionActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (SessionGate.gate(this)) return
         applySkin()
         lifecycleScope.launch {
             try {

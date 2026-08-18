@@ -215,6 +215,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (SessionGate.gate(this)) return
         applySkin()
         NoteNotificationManager.createChannel(this)
 

@@ -16,10 +16,14 @@ class PassphraseActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPassphraseBinding
     private var attemptCount = 0
     private var sessionStarted = false
+    private var destination: Intent? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         BlobStore.init(this)
         super.onCreate(savedInstanceState)
+        destination = intent.getParcelableExtra(
+            SessionGate.EXTRA_DESTINATION, Intent::class.java
+        )
         ThemeManager.apply()
         binding = ActivityPassphraseBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -50,6 +54,14 @@ class PassphraseActivity : AppCompatActivity() {
 
         binding.btnConfirm.backgroundTintList = Palette.tint(Palette.button)
         binding.btnConfirm.setTextColor(Palette.buttonText)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        destination = intent.getParcelableExtra(
+            SessionGate.EXTRA_DESTINATION, Intent::class.java
+        )
     }
 
     // ── Session ───────────────────────────────────────────────────────────
@@ -88,8 +100,7 @@ class PassphraseActivity : AppCompatActivity() {
             try {
                 if (isFirstRun) DataStore.createNew(null)
                 else DataStore.unlockWithoutPassphrase()
-                startActivity(Intent(this@PassphraseActivity, MainActivity::class.java))
-                finish()
+                SessionGate.resume(this@PassphraseActivity, destination)
             } catch (e: Exception) {
                 binding.tvStatus.visibility = View.GONE
                 binding.btnConfirm.visibility = View.VISIBLE
@@ -132,8 +143,7 @@ class PassphraseActivity : AppCompatActivity() {
                 }
 
                 if (success) {
-                    startActivity(Intent(this@PassphraseActivity, MainActivity::class.java))
-                    finish()
+                    SessionGate.resume(this@PassphraseActivity, destination)
                 } else {
                     onWrongPassphrase()
                 }

@@ -14,7 +14,14 @@ class AlarmReceiver : BroadcastReceiver() {
 
         // onReceive's own implicit wakelock covers this file read.
         val entries = AlarmStore.loadOrEmpty()
-        val alarm = entries.find { it.id == alarmId } ?: return
+        val alarm = entries.find { it.id == alarmId }
+        if (alarm == null) {
+            // Alarm was deleted after the PendingIntent was armed. Nothing to
+            // show, but the stale snooze intent must not survive to fire again.
+            AlarmScheduler.cancelSnooze(context, alarmId)
+            Fail.quiet("Alarm $alarmId fired but no longer exists; dropped")
+            return
+        }
 
         // Re-arm BEFORE showing UI: setExactAndAllowWhileIdle is one-shot, so a
         // repeating alarm that isn't re-armed here never fires again.
@@ -32,22 +39,16 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         // The implicit wakelock ends when onReceive returns, which can be before
-        // AlarmAlertActivity is drawn — in Doze the device may sleep in between
-        // and the alarm silently never happens. Hold one across the handoff.
-        // Not released here: the Activity needs it during startup. The timeout
-        // is the release mechanism, and it is short enough to be harmless.
+        // the full-screen intent is honoured — in Doze the device may sleep in
+        // between and the alarm silently never happens. Hold one across the
+        // handoff. Not released here: the Activity needs it during startup. The
+        // timeout is the release mechanism, and it is short enough to be harmless.
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "xyznotes:alarm")
             .acquire(20_000L)
 
-        context.startActivity(
-            Intent(context, AlarmAlertActivity::class.java).apply {
-                putExtra("alarmId", alarm.id)
-                putExtra("alarmName", alarm.name)
-                putExtra("displayText", alarm.displayText)
-                putExtra("repeatDays", alarm.repeatDays.toTypedArray())
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-        )
+        // NOT context.startActivity(). Background activity starts from a
+        // receiver are dropped silently on API 29+. See AlarmNotifier.
+        AlarmNotifier.fire(context, alarm)
     }
 }
