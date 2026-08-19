@@ -148,8 +148,7 @@ object DataStore {
         }
         return AppData(
             sections = sections, notes = notes,
-            alarms = AlarmStore.load(), categories = map.categories,
-            sectionSortOrder = map.sectionSortOrder, sectionSortAsc = map.sectionSortAsc
+            alarms = AlarmStore.loadOrQuarantine(), categories = map.categories, sectionSortOrder = map.sectionSortOrder, sectionSortAsc = map.sectionSortAsc
         ).also { cachedAppData = it; cacheValid = true }
     }
 

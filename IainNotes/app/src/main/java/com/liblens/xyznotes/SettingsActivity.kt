@@ -53,6 +53,17 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnExport.setOnClickListener {
             startActivity(Intent(this@SettingsActivity, ExportActivity::class.java))
         }
+        binding.btnReadCore.setOnClickListener {
+            showReadMe("Warnings", ReadMe.WARNINGS)
+        }
+        binding.btnReadLibraries.setOnClickListener {
+            showReadMe("Libraries", ReadMe.LIBRARIES)
+        }
+        binding.btnReadCrypto.setOnClickListener {
+            showReadMe("Cryptography", ReadMe.CRYPTOGRAPHY)
+        }
+
+        bindAbout()
 
         var listeningToRadio = false
         binding.radioTheme.setOnCheckedChangeListener { _, checkedId ->
@@ -78,20 +89,18 @@ class SettingsActivity : AppCompatActivity() {
         // Now enable the listener for user interaction
         listeningToRadio = true
     }
-
     override fun onResume() {
         super.onResume()
         if (SessionGate.gate(this)) return
         refreshPermissionStates()
     }
-
     private fun applySkin() {
         binding.root.setBackgroundColor(Palette.background)
         binding.header.setTextColor(Palette.textPrimary)
 
         listOf(
             binding.tvPassphraseLabel, binding.tvLockOnCloseLabel,
-            binding.tvThemeLabel, binding.tvPermissionsLabel, binding.aboutLabel,
+            binding.tvThemeLabel, binding.tvPermissionsLabel, binding.aboutLabel, binding.tvReadMeLabel,
             binding.rowExactAlarms, binding.rowDnd, binding.rowNotifications
         ).forEach { it.setTextColor(Palette.textPrimary) }
 
@@ -99,14 +108,17 @@ class SettingsActivity : AppCompatActivity() {
             binding.tvExactAlarmsState, binding.tvDndState, binding.tvNotificationsState
         ).forEach { it.setTextColor(Palette.textDim) }
 
-        listOf(binding.btnChangePassphrase, binding.btnExport).forEach {
+        listOf(binding.btnChangePassphrase, binding.btnExport, binding.btnReadCore, binding.btnReadLibraries, binding.btnReadCrypto).forEach {
             it.backgroundTintList = Palette.tint(Palette.button)
             it.setTextColor(Palette.buttonText)
         }
 
-        listOf(binding.divider3, binding.divider4, binding.divider5).forEach {
+        binding.divider3.setBackgroundColor(Palette.background)
+
+        listOf(binding.divider4, binding.divider5).forEach {
             it.setBackgroundColor(Palette.divider)
         }
+        binding.divider6.setBackgroundColor(Palette.dividerLightInvis)
 
         listOf(binding.radioLight, binding.radioDark).forEach {
             it.setTextColor(Palette.textPrimary)
@@ -117,8 +129,49 @@ class SettingsActivity : AppCompatActivity() {
             it.thumbTintList = Palette.tint(Palette.accent)
             it.trackTintList = Palette.tint(Palette.iconDim)
         }
+        binding.cardReadMe.setBackgroundColor(Palette.surface)
     }
 
+    private companion object {
+        // ⚠ Placeholder — replace with the real site before shipping.
+        const val WEBSITE = "https://liblens.com/xyznotes"
+    }
+
+    /** Version and site, resolved at runtime so the version can never drift
+     *  from what was actually built. */
+    private fun bindAbout() {
+        binding.aboutLabel.text =
+            "About\nVersion ${BuildConfig.VERSION_NAME}\n$WEBSITE"
+    }
+
+    private fun showReadMe(title: String, body: String) {
+        val view = layoutInflater.inflate(R.layout.dialog_readme, null)
+
+        val tvTitle = view.findViewById<TextView>(R.id.tvReadMeTitle)
+        val tvBody = view.findViewById<TextView>(R.id.tvReadMeBody)
+        val divider = view.findViewById<View>(R.id.readMeDivider)
+        val btnClose = view.findViewById<Button>(R.id.btnReadMeClose)
+
+        tvTitle.text = title
+        tvBody.text = body
+
+        // Same programmatic skinning as everywhere else — the dialog inherits
+        // nothing themed, so every colour is set here explicitly.
+        view.setBackgroundColor(Palette.surface)
+        tvTitle.setTextColor(Palette.textPrimary)
+        tvBody.setTextColor(Palette.textBody)
+        divider.setBackgroundColor(Palette.divider)
+        btnClose.backgroundTintList = Palette.tint(Palette.button)
+        btnClose.setTextColor(Palette.buttonText)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(view)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_bg)
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
     private fun bindPermissions() {
         val nm = getSystemService(NotificationManager::class.java)
 

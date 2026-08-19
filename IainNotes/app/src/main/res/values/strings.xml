@@ -7,5 +7,5 @@
     ttype
     ttex
     -->
-	<string name="aboutLabelText">About\nVersion 0.1.0_main</string>
+	<!--string name="aboutLabelText">About\nVersion 0.1.0_main</string-->
 </resources>

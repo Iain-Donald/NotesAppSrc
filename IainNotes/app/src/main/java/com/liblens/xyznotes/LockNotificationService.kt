@@ -13,7 +13,7 @@ import androidx.core.app.NotificationCompat
 class LockNotificationService : Service() {
 
     companion object {
-        const val CHANNEL_ID = "iain_notes_lock_channel"
+        const val CHANNEL_ID = "xyznotes_lock_channel_v1"
         const val NOTIFICATION_ID = 1001
         const val ACTION_DISMISS = "com.liblens.xyznotes.ACTION_DISMISS_LOCK"
 

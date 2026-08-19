@@ -9,7 +9,7 @@ import androidx.core.app.NotificationCompat
 
 object NoteNotificationManager {
 
-	const val CHANNEL_ID = "iain_notes_note_channel_v2"   // ← bumped
+	const val CHANNEL_ID = "xyznotes_note_channel_v2"
 	const val ACTION_CANCEL = "com.liblens.xyznotes.ACTION_CANCEL_NOTE_NOTIFY"
 	const val EXTRA_NOTE_ID = "noteId"
 	fun createChannel(context: Context) {

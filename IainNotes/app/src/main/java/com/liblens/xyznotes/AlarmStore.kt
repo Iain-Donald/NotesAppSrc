@@ -44,4 +44,30 @@ object AlarmStore {
 		)
 		DataStore.invalidateCache()
 	}
+
+	/** Degrading load for the app's own read path.
+	 *
+	 *  A corrupt alarms.json must not make the app unopenable. AlarmStore sits
+	 *  in the same load path as notes, so throwing here takes the whole corpus
+	 *  offline for a fault in an unrelated, far less valuable file — and an app
+	 *  that will not open drives the user to Clear Storage, which destroys
+	 *  everything. The file is moved aside rather than overwritten so the
+	 *  alarms remain recoverable by hand. */
+	fun loadOrQuarantine(): List<Alarm> = try {
+		load()
+	} catch (e: DataStoreException) {
+		quarantine()
+		Fail.warn("alarms.json corrupt; quarantined, continuing with no alarms", e)
+		emptyList()
+	}
+
+	private fun quarantine() {
+		val f = file()
+		if (!f.exists()) return
+		try {
+			f.renameTo(File(f.parentFile, "alarms.json.corrupt.${System.currentTimeMillis()}"))
+		} catch (e: SecurityException) {
+			Fail.warn("could not quarantine alarms.json", e)
+		}
+	}
 }

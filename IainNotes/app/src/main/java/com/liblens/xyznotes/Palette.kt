@@ -40,11 +40,14 @@ object Palette {
 	private fun pick(darkValue: Long, lightValue: Long): Int =
 		(if (dark) darkValue else lightValue).toInt()
 
+	val black = 0x00000000
+
 	// ── Surfaces ──────────────────────────────────────────────────────
-	val background get() = pick(0xFF000000, 0xFFEAEAE5)
-	val surface get() = pick(0xFF141519, 0xFFFFFFFF)   // was 0xFF404040 / 0xFFDDDDDD
+	val background get() = pick(0xFF000000, 0xFFFAF5F1)
+	val surface get() = pick(0xFF141519, 0xFFE5E1DD)   // was 0xFF404040 / 0xFFDDDDDD
 	val input      get() = pick(0xFF1E2027, 0xFFE0E0DA)
 	val divider    get() = pick(0xFFFFB300, 0xFFDDDDDD)
+	val dividerLightInvis get() = pick(0xFFFFB300, 0xFFFAF5F1) // same as background in light mode.
 
 	// ── Text ──────────────────────────────────────────────────────────
 	val textPrimary   get() = pick(0xFFFAFAFA, 0xFF111111)
