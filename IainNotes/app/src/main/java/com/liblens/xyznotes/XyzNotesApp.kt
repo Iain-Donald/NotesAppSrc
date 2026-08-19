@@ -18,6 +18,17 @@ class XyzNotesApp : Application() {
     override fun onCreate() {
         super.onCreate()
         BlobStore.init(this)
+        // Every install has at least one vault. Existing single-vault data has
+        // no vaults/ directory, so this also creates the manifest for it.
+        if (VaultStore.listVaults().isEmpty()) {
+            VaultStore.createVault("Notes", VaultStore.DEFAULT_VAULT_ID)
+        }
+        // setActiveVault, NOT switchVault — nothing is unlocked yet, there is
+        // no previous vault to tear down, and the incoming vault's alarms are
+        // already armed from the last session or from BootReceiver.
+        VaultStore.loadIndex().lastOpened
+            ?.takeIf { VaultStore.exists(it) }
+            ?.let { BlobStore.setActiveVault(it) }
         // Reads preferences.json off the main thread's critical path is not
         // possible here — Palette must be correct before the first setContentView.
         // The file is a few hundred bytes; this is a deliberate accepted cost.

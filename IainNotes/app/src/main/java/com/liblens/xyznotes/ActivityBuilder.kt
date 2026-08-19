@@ -251,5 +251,24 @@ object ActivityBuilder {
 			DialogInterface.BUTTON_NEUTRAL
 		).forEach { dialog.getButton(it)?.setTextColor(Palette.accent) }
 	}
+
+	/** AlertDialog's own title, message and button views come from AppCompat
+	 *  defaults and its window background from a static drawable — none of
+	 *  which follow Palette. Dialogs that supply their own custom view escape
+	 *  this because that view is skinned; dialogs built from setTitle and
+	 *  setMessage do not, and render near-white text on a near-white window.
+	 *
+	 *  Must run AFTER show(): the title and button views are not created until
+	 *  the dialog is laid out. */
+	fun skin(dialog: AlertDialog) {
+		dialog.window?.decorView?.background?.setTint(Palette.surface)
+		dialog.findViewById<TextView>(android.R.id.title)?.setTextColor(Palette.textPrimary)
+		dialog.findViewById<TextView>(android.R.id.message)?.setTextColor(Palette.textBody)
+		listOf(
+			DialogInterface.BUTTON_POSITIVE,
+			DialogInterface.BUTTON_NEGATIVE,
+			DialogInterface.BUTTON_NEUTRAL
+		).forEach { dialog.getButton(it)?.setTextColor(Palette.accent) }
+	}
 }
 

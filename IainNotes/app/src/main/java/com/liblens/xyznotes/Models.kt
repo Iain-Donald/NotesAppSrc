@@ -52,6 +52,7 @@ data class Note(
 
 @Serializable
 data class Alarm(
+    val vaultId: String = VaultStore.DEFAULT_VAULT_ID,
     val id: String = generateId("t"),
     val noteId: String,
     val sectionId: String,

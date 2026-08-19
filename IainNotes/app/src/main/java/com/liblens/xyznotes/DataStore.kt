@@ -63,12 +63,42 @@ object DataStore {
 
     suspend fun unlockWithoutPassphrase(): Boolean = unlock(null)
 
-    fun lock() {
+    fun lock() { lockLocked() }
+
+    private fun lockLocked() {
         dataKey?.let { Sodium.memzero(it) }
         dataKey = null
         unlocked = false
         cachedAppData = null
         cacheValid = false
+    }
+
+    suspend fun switchVault(context: Context, vaultId: String): Unit = withContext(Dispatchers.IO) {
+        // Tear down the outgoing vault's notifications BEFORE taking the mutex:
+        // load() needs it, and it must run while the vault is still unlocked —
+        // the notes live in the encrypted map and become unreadable the moment
+        // lockLocked() zeroes the key.
+        if (unlocked) {
+            val outgoing = load(context)
+            outgoing.notes.forEach { NoteNotificationManager.cancel(context, it.id) }
+        }
+
+        mutex.withLock {
+            // Alarms resolve through BlobStore.activeVault(), so these entries
+            // are unreachable after the switch and would fire against a vault
+            // the user has left.
+            AlarmStore.loadOrQuarantine().forEach { AlarmScheduler.cancel(context, it) }
+
+            lockLocked()
+            BlobStore.setActiveVault(vaultId)
+            VaultStore.saveIndex(VaultStore.loadIndex().copy(lastOpened = vaultId))
+
+            // alarms.json is plaintext and outside the container, so this works
+            // while locked — which it must, since no passphrase has been entered.
+            AlarmStore.loadOrQuarantine()
+                .filter { it.isActive }
+                .forEach { AlarmScheduler.schedule(context, it) }
+        }
     }
 
     suspend fun exportTo(stream: OutputStream, encryptedExport: Boolean) =

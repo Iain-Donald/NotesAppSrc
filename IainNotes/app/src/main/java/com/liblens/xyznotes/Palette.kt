@@ -60,6 +60,7 @@ object Palette {
 	val icon       get() = pick(0xFFEEEEEE, 0xFF333333)
 	val iconDim    get() = pick(0xFFAAAAAA, 0xFF888888)
 	val accent     get() = pick(0xFFFFB300, 0xFFCC8F00)
+	val accent2 get() = pick(0xFF4FC3F7, 0xFF1B7FB0)
 	val border     get() = pick(0xFFEEEEEE, 0xFFCCCCCC)
 
 	// ── Buttons ───────────────────────────────────────────────────────
@@ -75,6 +76,9 @@ object Palette {
 	// colours shouldn't invert with the theme.
 	val STATE_GRANTED = 0xFF4CAF50.toInt()
 	val STATE_DENIED  = 0xFFE53935.toInt()
+
+	val danger = 0xFFE53935.toInt()   // fixed: semantic, must not invert with skin
+
 
 	fun tint(color: Int): ColorStateList = ColorStateList.valueOf(color)
 }

@@ -12,7 +12,14 @@ object AlarmStore {
 
 	private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 
-	fun file(): File = File(BlobStore.root(), "userData/alarms.json")
+	/** Per-vault. Sits beside the blobs rather than inside them so
+	 *  AlarmReceiver can read it while the vault is locked.
+	 *
+	 *  Only the active vault's alarms are ever armed, so a receiver reading
+	 *  "the active vault" is always reading the right file. That is the whole
+	 *  reason alarms need no vault id: the invariant is maintained at switch
+	 *  time instead of being carried in every record. */
+	fun file(): File = File(VaultStore.vaultDir(BlobStore.activeVault()), "userData/alarms.json")
 		.also { it.parentFile?.mkdirs() }
 
 	/** Returns empty list on missing file. Throws on corrupt content. */
@@ -60,7 +67,6 @@ object AlarmStore {
 		Fail.warn("alarms.json corrupt; quarantined, continuing with no alarms", e)
 		emptyList()
 	}
-
 	private fun quarantine() {
 		val f = file()
 		if (!f.exists()) return

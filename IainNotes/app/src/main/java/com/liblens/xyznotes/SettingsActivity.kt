@@ -68,6 +68,10 @@ class SettingsActivity : AppCompatActivity() {
             showReadMe("Cryptography", ReadMe.CRYPTOGRAPHY)
         }
 
+        binding.btnVaults.setOnClickListener {
+            VaultUi.showPicker(this, lifecycleScope)
+        }
+
         bindAbout()
 
         var listeningToRadio = false
@@ -106,14 +110,14 @@ class SettingsActivity : AppCompatActivity() {
         listOf(
             binding.tvPassphraseLabel, binding.tvLockOnCloseLabel,
             binding.tvThemeLabel, binding.tvPermissionsLabel, binding.aboutLabel, binding.tvReadMeLabel,
-            binding.rowExactAlarms, binding.rowDnd, binding.rowNotifications
+            binding.rowExactAlarms, binding.rowDnd, binding.rowNotifications, binding.tvExperimentalLabel
         ).forEach { it.setTextColor(Palette.textPrimary) }
 
         listOf(
             binding.tvExactAlarmsState, binding.tvDndState, binding.tvNotificationsState
         ).forEach { it.setTextColor(Palette.textDim) }
 
-        listOf(binding.btnChangePassphrase, binding.btnExport, binding.btnReadCore, binding.btnReadLibraries, binding.btnReadCrypto).forEach {
+        listOf(binding.btnChangePassphrase, binding.btnExport, binding.btnReadCore, binding.btnReadLibraries, binding.btnReadCrypto, binding.btnVaults).forEach {
             it.backgroundTintList = Palette.tint(Palette.button)
             it.setTextColor(Palette.buttonText)
         }
