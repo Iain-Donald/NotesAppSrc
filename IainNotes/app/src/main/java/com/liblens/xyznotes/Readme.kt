@@ -9,19 +9,22 @@ object ReadMe {
     val WARNINGS = """
 		ABOUT THIS APP
 
+        This app contains no advertising, no analytics, no crash reporting,
+		and no telemetry of any kind. Nothing it stores leaves your device
+		unless you explicitly export it. When a password is enabled, your data is encrypted with a few of the best publicly known cryptography algorithms and modes of operation as of the release date of this version. 
+
 YOUR DATA AND UNINSTALLING
 
-		XyzNotes stores your notes in the app's alloted storage area. Android
+		XyzNotes stores your notes in the app's allotted storage area. Android
 		deletes that area completely when the app is uninstalled or when you
-		use "Clear storage" in system settings. Nothing is kept on a server,
-		and there is no account to restore from.
+		use "Clear storage" in system settings. There is no alternative data location apart from that and your exports.
 
-		This app also opts out of Android's automatic cloud backup. As of now, you may sync the files yourself after exporting them from within the app. The trade-off is that there is no safety net if the app's storage is removed.
+		This app opts out of Android's automatic cloud backup. As of now, you may sync the files yourself after exporting them from within the app. Exported data may be decrypted using your associated vault password with ___.
 
 		If you have set a passphrase, there is a second consequence. Your notes
 		are encrypted with a key that is itself stored in the app's storage. If
 		that storage is deleted, the key is gone, and the notes cannot be
-		decrypted. There is no recovery process. 
+		decrypted. There is no recovery process. For exported notes, recovery is possible if you have the key. 
 
 
 		BEFORE YOU UNINSTALL
@@ -29,37 +32,25 @@ YOUR DATA AND UNINSTALLING
 		To keep your notes:
 
 		1. Open Settings.
-		2. If you have a passphrase set, turn it off. This decrypts your notes
-		   so they no longer depend on a key that is about to be deleted.
-		3. Tap "Export data" and save the file somewhere outside the app —
-		   your Documents folder, a cloud drive, or an SD card. The export
-		   location you choose is yours and is not removed when the app is
-		   uninstalled.
-		4. Confirm the exported file exists and is not empty before you
+		2. Prepare to export: If you have a passphrase set, your first option is to turn it off. This decrypts your notes for easy access after exporting. Your second option option is to leave it on. This way, exporting your notes will come with a key. You will need this key and your password to unlock your notes after exporting them. 
+		3. Tap "Export data" and save the file somewhere outside the app. Virtually anywhere you choose here is safe from deletion upon uninstalling the app.
+		4. Confirm the exported file exists, is not empty, and is accessible before you
 		   uninstall.
 
-		Doing steps 2 and 3 in that order matters. 
-
 		Exporting regularly is worth doing even if you have no plans to
-		uninstall. Phones get lost, broken, and factory-reset without warning.
+		uninstall. There are many ways to lose your phone data or your phone itself!
 	""".trimIndent()
 
     val LIBRARIES = """
 		LIBRARIES AND LICENCES
 
-		XyzNotes deliberately uses few dependencies. Every one adds download
-		size, attack surface, and a release cadence outside our control, so
-		each is here because writing it by hand would have been worse.
-
-		This app contains no advertising, no analytics, no crash reporting,
-		and no telemetry of any kind. Nothing it stores leaves your device
-		unless you explicitly export it.
-
+		
+        Here are all coding libraries used in this app, accompanied by justification for their use. All other functionality is manually implemented. 
 
 		─────────────────────────────────────────────
 
 		libsodium
-		Licence: ISC
+		Licence: ISC (
 		Used for: all cryptography — XChaCha20-Poly1305 encryption and Argon2id
 		passphrase hashing. Compiled from source and linked statically, so the
 		exact version in this app is fixed at build time rather than supplied
@@ -88,7 +79,7 @@ YOUR DATA AND UNINSTALLING
 		─────────────────────────────────────────────
 
 		AndroidX libraries
-		Licence: Apache 2.0
+		Licence: Apache 2.0 
 		Used for: core interface components. Specifically AppCompat (activities
 		and dialogs), ConstraintLayout and CardView (screen layout),
 		RecyclerView (scrolling lists), Core-KTX (Android API helpers), and
@@ -97,15 +88,7 @@ YOUR DATA AND UNINSTALLING
 		─────────────────────────────────────────────
 
 
-		ABOUT THESE LICENCES
-
-		Apache 2.0 and ISC are permissive open-source licences. They allow this
-		app to include the software commercially, and they require that the
-		original copyright notices and licence terms are made available — which
-		is what this page is for. Neither licence gives the authors any claim
-		over your notes or over this app.
-
-		Full licence texts are available from each project's own website.
+		LICENSES
 	""".trimIndent()
 
     val CRYPTOGRAPHY = """
