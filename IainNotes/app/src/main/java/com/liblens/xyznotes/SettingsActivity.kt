@@ -5,6 +5,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -15,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import com.liblens.xyznotes.Palette.STATE_GRANTED
+import com.liblens.xyznotes.Palette.STATE_DENIED
 import com.liblens.xyznotes.databinding.ActivitySettingsBinding
 import kotlinx.coroutines.launch
 
@@ -188,17 +193,38 @@ class SettingsActivity : AppCompatActivity() {
                 putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
             })
         }
+
+        binding.tvExactAlarmsState.setOnClickListener {
+            binding.rowExactAlarms.performClick()
+        }
+        binding.tvDndState.setOnClickListener {
+            binding.rowDnd.performClick()
+        }
+        binding.tvNotificationsState.setOnClickListener {
+            binding.rowNotifications.performClick()
+        }
+    }
+
+    /** Status word plus a coloured dot. The dot is a span rather than a second
+     *  view so the row layout is untouched, and colour is never the only
+     *  signal — the word still says which state it is, which matters for the
+     *  ~8% of men with red-green colour vision deficiency. */
+    private fun setPermissionState(view: TextView, granted: Boolean) {
+        val label = if (granted) "Granted" else "Not granted"
+        val text = SpannableString("$label  ●")
+        text.setSpan(
+            ForegroundColorSpan(if (granted) STATE_GRANTED else STATE_DENIED),
+            label.length + 2, text.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        view.text = text
     }
 
     private fun refreshPermissionStates() {
         val nm = getSystemService(NotificationManager::class.java)
-        binding.tvExactAlarmsState.text =
-            if (AlarmScheduler.canScheduleExact(this)) "Granted" else "Not granted"
-        binding.tvDndState.text =
-            if (nm.isNotificationPolicyAccessGranted) "Granted" else "Not granted"
-        binding.tvNotificationsState.text =
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
-                == PackageManager.PERMISSION_GRANTED) "Granted" else "Not granted"
+        setPermissionState(binding.tvExactAlarmsState, AlarmScheduler.canScheduleExact(this))
+        setPermissionState(binding.tvDndState, nm.isNotificationPolicyAccessGranted)
+        setPermissionState(binding.tvNotificationsState, checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
     }
 
     private fun loadPrefs() {

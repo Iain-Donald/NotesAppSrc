@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="appBackground">#EAEAE5</color>
-    <color name="appSurface">#DDDDDD</color>
+    <!--color name="appSurface">#DDDDDD</color--> <!-- hopefully removed all usages-->
     <color name="appTextPrimary">#111111</color>
     <color name="appTextSecondary">#555550</color>
     <color name="appTextHint">#999990</color>

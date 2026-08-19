@@ -45,7 +45,7 @@ object Palette {
 	// ── Surfaces ──────────────────────────────────────────────────────
 	val background get() = pick(0xFF000000, 0xFFFAF5F1)
 	val surface get() = pick(0xFF141519, 0xFFE5E1DD)   // was 0xFF404040 / 0xFFDDDDDD
-	val input      get() = pick(0xFF1E2027, 0xFFE0E0DA)
+	val input      get() = pick(0xFF1A1B1E, 0xFFE0E0DA)
 	val divider    get() = pick(0xFFFFB300, 0xFFDDDDDD)
 	val dividerLightInvis get() = pick(0xFFFFB300, 0xFFFAF5F1) // same as background in light mode.
 
@@ -70,6 +70,11 @@ object Palette {
 	// Identical in both themes; kept here so nothing reaches into colors.xml.
 	val badgeActive   = 0xFFFF5252.toInt()
 	val badgeInactive = 0xFF888888.toInt()
+
+	// Fixed rather than pick()'d — both read on either skin, and semantic
+	// colours shouldn't invert with the theme.
+	val STATE_GRANTED = 0xFF4CAF50.toInt()
+	val STATE_DENIED  = 0xFFE53935.toInt()
 
 	fun tint(color: Int): ColorStateList = ColorStateList.valueOf(color)
 }

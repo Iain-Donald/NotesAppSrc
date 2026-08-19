@@ -370,7 +370,8 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, "Section \"$name\" added", Toast.LENGTH_SHORT).show()
                 }
             }
+
             .setNegativeButton("Cancel", null)
-            .show()
+            .create().also { it.show(); ActivityBuilder.skinDialog(it) }
     }
 }

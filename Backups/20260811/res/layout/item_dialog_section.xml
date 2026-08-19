@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:paddingLeft="24dp"
+	android:paddingRight="24dp">
+
+	<LinearLayout
+		android:id="@+id/nameRow"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center_vertical"
+		android:layout_marginTop="8dp">
+
+		<TextView
+			android:id="@+id/nameLabel"
+			android:layout_width="80dp"
+			android:layout_height="wrap_content"
+			android:textSize="16sp"
+			android:textColor="@color/buttonL0"
+			android:text="Name" />
+
+		<EditText
+			android:id="@+id/sectionInput"
+			android:layout_width="0dp"
+			android:layout_weight="1"
+			android:layout_height="wrap_content"
+			android:hint="Section name"
+			android:paddingTop="12dp"
+			android:paddingBottom="12dp" />
+
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/categoryRow"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center_vertical"
+		android:layout_marginTop="8dp">
+
+		<TextView
+			android:id="@+id/catLabel"
+			android:layout_width="80dp"
+			android:layout_height="wrap_content"
+			android:textSize="16sp"
+			android:textColor="@color/buttonL0"
+			android:text="Group" />
+
+		<LinearLayout
+			android:id="@+id/categoryValue"
+			android:layout_width="0dp"
+			android:layout_weight="1"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal"
+			android:gravity="center_vertical"
+			android:background="@drawable/underline"
+			android:paddingTop="12dp"
+			android:paddingBottom="12dp">
+
+			<View
+				android:id="@+id/colorDot"
+				android:layout_width="24dp"
+				android:layout_height="24dp" />
+
+			<TextView
+				android:id="@+id/tvCategory"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="12dp"
+				android:textSize="16sp"
+				android:textColor="@color/buttonL0"
+				android:text="Category" />
+
+		</LinearLayout>
+
+	</LinearLayout>
+
+</LinearLayout>

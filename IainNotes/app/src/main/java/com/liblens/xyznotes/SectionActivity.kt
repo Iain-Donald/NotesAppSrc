@@ -102,7 +102,7 @@ class SectionActivity : AppCompatActivity() {
                         }
                     }
                     .setNegativeButton("Cancel", null)
-                    .show()
+                    .create().also { it.show(); ActivityBuilder.skinDialog(it) }
             },
             onPin = { note ->
                 lifecycleScope.launch {

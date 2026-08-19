@@ -2,6 +2,7 @@ package com.liblens.xyznotes
 
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -30,8 +31,7 @@ object ActivityBuilder {
 	}
 
 	/** Themed builder — use in place of AlertDialog.Builder(this). */
-	fun dialog(activity: Activity): AlertDialog.Builder =
-		AlertDialog.Builder(activity, R.style.RoundedDialog)
+	fun dialog(activity: Activity): AlertDialog.Builder = AlertDialog.Builder(activity, R.style.RoundedDialog)
 
 	private fun dp(v: View, n: Int) = (n * v.resources.displayMetrics.density).toInt()
 
@@ -127,7 +127,7 @@ object ActivityBuilder {
 				if (n.isNotEmpty()) onSubmit(n, colorId)
 			}
 			.setNegativeButton("Cancel", null)
-			.show()
+			.create().also { it.show(); skinDialog(it) }
 	}
 
 	private fun confirmDeleteCategory(activity: Activity, cat: Category, onConfirm: () -> Unit) {
@@ -136,7 +136,7 @@ object ActivityBuilder {
 			.setMessage("Sections in this group will keep their names but lose the group.")
 			.setPositiveButton("Delete") { _, _ -> onConfirm() }
 			.setNegativeButton("Cancel", null)
-			.show()
+			.create().also { it.show(); skinDialog(it) }
 	}
 
 	fun newCategoryDialog(activity: Activity, onSubmit: (String, Int) -> Unit) =
@@ -237,5 +237,19 @@ object ActivityBuilder {
 	}
 
 	fun selectedCategoryId(root: View): String = root.getTag(R.id.colorDot) as? String ?: ""
+
+	/** AlertDialog's window background is a static drawable, so it cannot
+	 *  follow Palette on its own. Tinting the window drawable after show()
+	 *  keeps the shape and inset from dialog_bg while taking the colour from
+	 *  the skin — the same trick used for every other view in the app. */
+	fun skinDialog(dialog: AlertDialog) {
+		dialog.window?.decorView?.background?.setTint(Palette.surface)
+		dialog.findViewById<TextView>(android.R.id.title)?.setTextColor(Palette.textPrimary)
+		listOf(
+			DialogInterface.BUTTON_POSITIVE,
+			DialogInterface.BUTTON_NEGATIVE,
+			DialogInterface.BUTTON_NEUTRAL
+		).forEach { dialog.getButton(it)?.setTextColor(Palette.accent) }
+	}
 }
 

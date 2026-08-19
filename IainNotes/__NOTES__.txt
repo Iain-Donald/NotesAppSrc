@@ -1,3 +1,53 @@
+***
+***
+***
+
+
+///// TODO
+lens
+
+//// Licenses 
+GitHub and in App. 
+
+//// App release
+fdroid (oregano)
+codeberg (oregano)
+play store (basil)
+app store (basil ios)
+
+//// Dev
+/// Utilize means of async everywhere practical. Java 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Multiple Gradle daemons might be spawned because the Gradle JDK and JAVA_HOME locations are different.
 Project 'IainNotes' is using the following JDK location when running Gradle:
 'C:\Program Files\Android\Android Studio1\jbr'

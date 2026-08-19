@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EditText xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/sectionInput"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:hint="Section name"
+	android:paddingLeft="48px"
+	android:paddingTop="24px"
+	android:paddingRight="48px"
+	android:paddingBottom="24px" />

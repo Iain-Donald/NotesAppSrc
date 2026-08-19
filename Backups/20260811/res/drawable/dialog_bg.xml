@@ -1,0 +1,8 @@
+<!-- res/drawable/dialog_bg.xml, inset variant -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+	android:inset="16dp">
+	<shape android:shape="rectangle">
+		<corners android:radius="30dp" />
+		<solid android:color="@color/appSurface" />
+	</shape>
+</inset>

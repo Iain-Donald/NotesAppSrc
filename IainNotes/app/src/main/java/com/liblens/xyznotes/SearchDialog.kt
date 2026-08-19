@@ -1,8 +1,10 @@
 package com.liblens.xyznotes
 
+import android.R
 import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.text.Editable
 import android.text.TextWatcher
@@ -35,6 +37,26 @@ object SearchDialog {
 
 		val dialog = Dialog(activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 		dialog.setContentView(b.root)
+		// color
+		b.cardSearch.setCardBackgroundColor(Palette.surface)
+		b.etSearchQuery.setTextColor(Palette.textPrimary)
+		b.etSearchQuery.setHintTextColor(Palette.textHint)
+		b.btnCaseSensitive.setTextColor(
+			ColorStateList(
+				arrayOf(intArrayOf(R.attr.state_selected), intArrayOf()),
+				intArrayOf(Palette.accent, Palette.textDim)
+			)
+		)
+		b.btnSearchOptions.imageTintList = Palette.tint(Palette.icon)
+		b.dividerOptions.setBackgroundColor(Palette.divider)
+		b.tvContentLabel.setTextColor(Palette.textDim)
+		b.tvNoResults.setTextColor(Palette.textDim)
+		b.tvScopeLabel.setTextColor(Palette.textDim)
+		listOf(b.btnScopeSection, b.btnScopeAll).forEach {
+			it.backgroundTintList = Palette.tint(Palette.button)
+			it.setTextColor(Palette.buttonText)
+		}
+
 		dialog.setCanceledOnTouchOutside(true)
 		dialog.window?.apply {
 			setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
