@@ -9,9 +9,11 @@ object ReadMe {
     val WARNINGS = """
 		ABOUT THIS APP
 
-        This app contains no advertising, no analytics, no crash reporting,
-		and no telemetry of any kind. Nothing it stores leaves your device
-		unless you explicitly export it. When a password is enabled, your data is encrypted with a few of the best publicly known cryptography algorithms and modes of operation as of the release date of this version. 
+This app contains no advertising, no analytics, no crash reporting,
+and no telemetry of any kind. Nothing it stores leaves your device
+unless you explicitly export it. None of its security model relies on secrecy to be secure. If you have any feedback, please add it to the GitHub link at the bottom of the settings page. 
+
+When a password is enabled, your data is unlocked with the following process: password (not stored anywhere here) -> key derivation function -> decrypts the 256 bit data key -> decrypts your data via stream cipher function. This process takes place in memory. Your data is also decrypted into memory. When a password is enabled, no decrypted data is cached or stored in storage. Encrypted temp files followed by an atomic swap operation are used for all edits, which make recovery in the event of crashes or power loss possible. All relevant information required for you to access your data from exported encrypted files such as the header and cryptography structure are documented in the event this app is lost to time. A an example CLI based app for is already provided on the GitHub :)
 
 YOUR DATA AND UNINSTALLING
 
@@ -92,38 +94,22 @@ YOUR DATA AND UNINSTALLING
 	""".trimIndent()
 
     val CRYPTOGRAPHY = """
-		HOW YOUR NOTES ARE PROTECTED
+HOW YOUR NOTES ARE PROTECTED
 
-		This page describes exactly what the app does. Publishing it is
-		deliberate. A cryptographic design that depends on being kept secret is
-		a broken one — security comes from the key, not from hiding the method.
-		Describing it openly also lets anyone who knows the subject check the
-		claims.
+This app does not intend to rely on secrecy to achieve security. The design of its security will be discovered either way. This information is provided so you can access your data without relying on this app. 
 
+WHEN THERE IS NO PASSPHRASE
 
-		THE SHORT VERSION
-
-		If you set a passphrase, your notes are encrypted with modern,
-		well-regarded algorithms, and the passphrase is the only way in. If you
-		do not set one, your notes are stored unencrypted and are protected
-		only by Android's own separation between apps.
+Notes are written to disk as plain files in the app's private storage
+area. Other apps cannot read them, but anyone with physical access to
+an unlocked device, or with the ability to read the phone's storage, can. 
 
 
-		WHEN THERE IS NO PASSPHRASE
+WHEN THERE IS A PASSPHRASE
 
-		Notes are written to disk as plain files in the app's private storage
-		area. Other apps cannot read them, but anyone with physical access to
-		an unlocked device, or with the ability to read the phone's storage,
-		can. Choose a passphrase if that matters to you.
+Two separate keys are involved.
 
-
-		WHEN THERE IS A PASSPHRASE
-
-		Two separate keys are involved.
-
-		The data key is a random 256-bit value generated on first use. It
-		encrypts your notes. It never changes unless you remove and re-add a
-		passphrase, and it is never shown to you.
+The data key is a random 256-bit value generated on first use. It encrypts your notes. It never changes unless you remove and re-add a passphrase, and it is never shown to you.
 
 		The passphrase key is derived from what you type, using Argon2id — a
 		function designed to be slow and memory-hungry specifically to make
@@ -140,30 +126,23 @@ YOUR DATA AND UNINSTALLING
 		to decrypt.
 
 
-		THE ENCRYPTION ITSELF
+		THE ENCRYPTION THEORY
 
-		Notes are encrypted with XChaCha20-Poly1305. This is authenticated
-		encryption: as well as hiding the contents, it detects tampering. A
-		note that has been altered on disk fails to decrypt rather than
-		decrypting to something wrong.
+		Notes are encrypted with the XChaCha20-Poly1305 stream cipher. This is stream cipher, safer than the widely used but flawed AES-GCM, which is excellent in theory, but almost always flawed in its implementation. Despite Government, Corporate, and Android developer recommendations, requirements, and guidelines, I decided not to trust AES-GCM. Even without hardware acceleration, XChaCha20-Poly1305 is currently faster and more secure than AES-GCM. AEGIS-256 was another consideration, but without hardware acceleration, AEGIS-256 also becomes slow and vulnerable. In the best case for AEGIS-256 compared to the actual XChaCha20-Poly1305 cryptography active here, we are playing with two infinities so vast that any forseeable quantum attacks or attacks by the world's computing power are not a concern for your notes! Breaking a flawless AES-GCM implementation is not so far fetched, and consistent incremental progress has dropped it to supercomputer territory as of today. Our computers have many common channels of leaking data from AES implementations, resulting in countless increasingly trivial breaks in practice. 
 
-		Each note is encrypted separately, with its own random nonce, and is
-		bound to its own location. A note file copied to a different name will
-		not decrypt. This limits the damage from a corrupted file to that one
-		note rather than to everything.
+THE SECURITY MODEL ITSELF
+
+		Each note is encrypted separately using XChaCha20-Poly1305. The AAD (Additional Associated Data) includes the file header metadata, creating a unique nonce that is bound to its own location. A note file copied to a different location, name changed, a single bit changes anywhere in its header or data will not decrypt. Tampered or corrupted data will simply not decrypt. The risk of data loss is mitigated by each note using its own encryption, and the export/import/merge features. 
 
 
 		WHILE YOU ARE USING THE APP
 
 		Notes are decrypted in memory only when displayed, and the data key is
 		wiped from memory when the app locks. Reading, editing, and saving all
-		pass through the same encryption path — there is no cache of decrypted
+		pass through the same encryption path. There is no cache of decrypted
 		notes on disk.
 
-		Every save writes to a temporary file first and then replaces the
-		original in a single step. If the device loses power mid-save, you
-		keep either the old note or the new one, never a corrupted mixture.
-
+		Every save writes to a temporary file which then atomically replaces the previous version. If the device loses power mid-save, you always keep one of these versions, never a corrupted mixture. 
 
 		EXPORTS
 
